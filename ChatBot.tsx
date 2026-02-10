@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, Sparkles, X, ExternalLink } from 'lucide-react';
-import { ChatMessage, Scheme } from '../types';
-import { chatWithGemini } from '../services/geminiService';
+import { ChatMessage, Scheme } from './types';
+import { chatWithGemini } from './services/geminiService';
 
 interface ChatBotProps {
   scheme: Scheme;
