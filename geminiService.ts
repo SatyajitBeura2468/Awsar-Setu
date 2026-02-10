@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Scheme, UserProfile, SchemeType } from '../types';
+import { Scheme, UserProfile, SchemeType } from './types';
 
 let aiClient: GoogleGenAI | null = null;
 
