@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scheme, SchemeType } from '../types';
+import { Scheme } from './types';
 import { ArrowRight, MapPin, Building2, ShieldCheck } from 'lucide-react';
 
 interface SchemeCardProps {
