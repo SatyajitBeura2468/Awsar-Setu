@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, ViewState, Scheme, SchemeType } from './types';
 import { INDIAN_STATES, MOCK_SCHEMES } from './constants';
-import { fetchLiveSchemes, fetchSchemeDetails } from './services/geminiService';
-import Button from './components/Button';
-import Input from './components/Input';
-import SchemeCard from './components/SchemeCard';
-import ChatBot from './components/ChatBot';
+import { fetchLiveSchemes, fetchSchemeDetails } from './geminiService';
+import Button from './Button';
+import Input from './Input';
+import SchemeCard from './SchemeCard';
+import ChatBot from './ChatBot';
 import { 
   MapPin, 
   Bell, 
