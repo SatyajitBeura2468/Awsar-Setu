@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, ViewState, Scheme, SchemeType } from './types';
+import { UserProfile, ViewState, Scheme } from './types'; // Removed SchemeType
 import { INDIAN_STATES, MOCK_SCHEMES } from './constants';
-import { fetchLiveSchemes, fetchSchemeDetails } from './geminiService';
+import { fetchLiveSchemes, fetchSchemeDetails, chatWithGemini } from './geminiService';
 import Button from './Button';
 import Input from './Input';
 import SchemeCard from './SchemeCard';
@@ -18,7 +18,6 @@ import {
   LogOut,
   Sparkles,
   Bot,
-  Loader2,
   Wifi,
   Filter,
   RefreshCw
@@ -33,7 +32,9 @@ const App: React.FC = () => {
     notificationsEnabled: false,
     isLoggedIn: false
   });
-  const [activeTab, setActiveTab] = useState<SchemeType | 'All'>('All');
+  
+  // Changed activeTab to string to avoid SchemeType crash
+  const [activeTab, setActiveTab] = useState('All');
   const [selectedScheme, setSelectedScheme] = useState<Scheme | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -51,18 +52,15 @@ const App: React.FC = () => {
     if (user.name && user.location && user.age > 0) {
       setUser(prev => ({ ...prev, isLoggedIn: true }));
       setLoadingSchemes(true);
-      // Move to dashboard view to show the loading overlay
       setView('DASHBOARD');
 
       try {
-        // Fetch live data grounded in official websites
         const liveData = await fetchLiveSchemes({ ...user, isLoggedIn: true, notificationsEnabled: user.notificationsEnabled });
         
         if (liveData && liveData.length > 0) {
           setSchemes(liveData);
           setUsingLive(true);
         } else {
-          // Fallback if AI returns empty
           setSchemes(MOCK_SCHEMES);
           setUsingLive(false);
         }
@@ -80,19 +78,20 @@ const App: React.FC = () => {
     setUser(prev => ({ ...prev, notificationsEnabled: !prev.notificationsEnabled }));
   };
 
-  // Derive available tags based on current tab (Government Type)
+  // Derive available tags (Safe version)
   const availableTags = React.useMemo(() => {
     const visibleSchemes = schemes.filter(scheme => 
       activeTab === 'All' 
         ? true 
-        : activeTab === SchemeType.STATE 
-          ? scheme.type === SchemeType.STATE && (scheme.state === user.location || !scheme.state) 
-          : scheme.type === activeTab
+        : activeTab === 'State' 
+          ? (scheme.provider?.includes('State') || scheme.provider?.includes(user.location))
+          : scheme.provider?.includes('Central')
     );
-    return Array.from(new Set(visibleSchemes.flatMap(s => s.tags))).sort();
+    // Safety: If tags are missing, use the type as a tag
+    return Array.from(new Set(visibleSchemes.flatMap(s => s.tags || [s.type]))).sort();
   }, [schemes, activeTab, user.location]);
 
-  // Reset selected tag when tab changes to avoid empty states
+  // Reset selected tag when tab changes
   useEffect(() => {
     setSelectedTag(null);
   }, [activeTab]);
@@ -101,17 +100,24 @@ const App: React.FC = () => {
   useEffect(() => {
     const enrichDetails = async () => {
       if (view === 'SCHEME_DETAILS' && selectedScheme && usingLive) {
-        // Only enrich if details look sparse (e.g. empty arrays from the list fetch)
-        // or just always enrich to ensure "Official Source" accuracy.
-        // Let's verify if we need to enrich
-        const needsEnrichment = selectedScheme.benefits.length === 0 || selectedScheme.eligibility.length === 0 || selectedScheme.applicationProcess.length === 0;
+        // Only enrich if details look sparse
+        const needsEnrichment = !selectedScheme.benefits || selectedScheme.benefits.length === 0;
         
         if (needsEnrichment) {
             setIsEnriching(true);
             try {
-                const enrichedScheme = await fetchSchemeDetails(selectedScheme);
+                // Fetch a summary description using the new function
+                const enrichedDesc = await fetchSchemeDetails(selectedScheme);
+                const enrichedScheme = { 
+                    ...selectedScheme, 
+                    description: enrichedDesc,
+                    // Add dummy arrays if missing to prevent crashes
+                    benefits: selectedScheme.benefits || ["View official portal for details"],
+                    eligibility: selectedScheme.eligibility || ["Check official guidelines"],
+                    applicationProcess: selectedScheme.applicationProcess || ["Visit the official website"]
+                };
+                
                 setSelectedScheme(enrichedScheme);
-                // Also update the item in the main list so we don't re-fetch if they go back and forth
                 setSchemes(prev => prev.map(s => s.id === enrichedScheme.id ? enrichedScheme : s));
             } catch (err) {
                 console.error("Failed to enrich scheme details", err);
@@ -125,25 +131,25 @@ const App: React.FC = () => {
     enrichDetails();
   }, [selectedScheme?.id, view, usingLive]);
 
-  // Filter Logic: State + Age + Search + Tag
+  // Filter Logic
   const filteredSchemes = schemes.filter(scheme => {
-    // 1. Tab/State Filter
+    // 1. Tab/Provider Filter (Fixed logic)
     const matchesTab = activeTab === 'All' 
       ? true 
-      : activeTab === SchemeType.STATE 
-        ? scheme.type === SchemeType.STATE && (scheme.state === user.location || !scheme.state) 
-        : scheme.type === activeTab;
+      : activeTab === 'State' 
+        ? (scheme.provider?.includes('State') || scheme.provider?.includes(user.location) || scheme.provider?.includes('Odisha'))
+        : (scheme.provider?.includes('Central') || scheme.provider?.includes('India'));
     
     // 2. Search Filter
     const matchesSearch = scheme.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          scheme.description.toLowerCase().includes(searchTerm.toLowerCase());
+                          (scheme.description && scheme.description.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // 3. Age Filter (If constraints exist in the data)
+    // 3. Age Filter
     const matchesAge = (!scheme.minAge || user.age >= scheme.minAge) && 
                        (!scheme.maxAge || user.age <= scheme.maxAge);
     
     // 4. Tag Filter
-    const matchesTag = selectedTag ? scheme.tags.includes(selectedTag) : true;
+    const matchesTag = selectedTag ? (scheme.tags?.includes(selectedTag) || scheme.type === selectedTag) : true;
     
     return matchesTab && matchesSearch && matchesAge && matchesTag;
   });
@@ -153,7 +159,6 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-slate-100 relative overflow-hidden">
-           {/* Decor */}
            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-brand-100 blur-2xl opacity-60"></div>
            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 rounded-full bg-blue-100 blur-2xl opacity-60"></div>
 
@@ -229,7 +234,7 @@ const App: React.FC = () => {
     );
   }
 
-  // Scheme Details View with Floating Chat Toggle
+  // Scheme Details View
   if (view === 'SCHEME_DETAILS' && selectedScheme) {
     return (
       <div className="min-h-screen bg-slate-50 relative">
@@ -259,15 +264,10 @@ const App: React.FC = () => {
                      <span className="px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold uppercase tracking-wider">
                        {selectedScheme.type}
                      </span>
-                     {selectedScheme.state && (
+                     {selectedScheme.provider && (
                        <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider">
-                         {selectedScheme.state}
+                         {selectedScheme.provider}
                        </span>
-                     )}
-                     {selectedScheme.minAge && (
-                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase tracking-wider">
-                          Age: {selectedScheme.minAge}+
-                        </span>
                      )}
                   </div>
                   
@@ -280,7 +280,7 @@ const App: React.FC = () => {
                         <span className="w-10 h-10 rounded-xl bg-green-100 text-green-600 flex items-center justify-center shadow-sm"><Sparkles size={20}/></span>
                         Benefits
                       </h3>
-                      {selectedScheme.benefits.length > 0 ? (
+                      {selectedScheme.benefits && selectedScheme.benefits.length > 0 ? (
                         <ul className="space-y-4">
                             {selectedScheme.benefits.map((benefit, idx) => (
                             <li key={idx} className="flex items-start gap-3 text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -299,7 +299,7 @@ const App: React.FC = () => {
                          <span className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm"><User size={20}/></span>
                          Eligibility
                       </h3>
-                       {selectedScheme.eligibility.length > 0 ? (
+                       {selectedScheme.eligibility && selectedScheme.eligibility.length > 0 ? (
                         <ul className="space-y-4">
                             {selectedScheme.eligibility.map((item, idx) => (
                             <li key={idx} className="flex items-start gap-3 text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -319,7 +319,7 @@ const App: React.FC = () => {
                          <span className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm"><Briefcase size={20}/></span>
                          How to Apply
                       </h3>
-                      {selectedScheme.applicationProcess.length > 0 ? (
+                      {selectedScheme.applicationProcess && selectedScheme.applicationProcess.length > 0 ? (
                         <div className="space-y-6">
                             {selectedScheme.applicationProcess.map((step, idx) => (
                             <div key={idx} className="flex gap-6 relative">
@@ -336,7 +336,7 @@ const App: React.FC = () => {
                             ))}
                         </div>
                       ) : (
-                          <div className="text-slate-400 italic bg-slate-50 p-4 rounded-xl">Checking official portals...</div>
+                          <div className="text-slate-400 italic bg-slate-50 p-4 rounded-xl">Check official portal.</div>
                       )}
                   </div>
                 </div>
@@ -356,7 +356,7 @@ const App: React.FC = () => {
           </button>
         )}
 
-        {/* Chat Modal/Overlay */}
+        {/* Chat Modal */}
         {isChatOpen && (
           <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/30 backdrop-blur-sm p-0 sm:p-4 animate-[fadeIn_0.2s_ease-out]">
              <div className="w-full sm:max-w-lg h-[85vh] sm:h-[700px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-[slideUp_0.3s_ease-out]">
@@ -383,11 +383,6 @@ const App: React.FC = () => {
            </div>
            <h2 className="text-xl font-bold text-slate-900 mb-2">Connecting to Official Databases...</h2>
            <p className="text-slate-500 max-w-xs mx-auto">Searching for live schemes in <span className="font-semibold text-brand-600">{user.location}</span> matching age <span className="font-semibold text-brand-600">{user.age}</span>.</p>
-           <div className="mt-8 flex gap-2 justify-center">
-             <span className="w-2 h-2 bg-brand-500 rounded-full animate-bounce"></span>
-             <span className="w-2 h-2 bg-brand-500 rounded-full animate-bounce delay-100"></span>
-             <span className="w-2 h-2 bg-brand-500 rounded-full animate-bounce delay-200"></span>
-           </div>
         </div>
       )}
 
@@ -447,17 +442,17 @@ const App: React.FC = () => {
 
         {/* Tabs (Government Type) */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-2 scrollbar-hide">
-          {['All', SchemeType.CENTRAL, SchemeType.STATE].map((tab) => (
+          {['All', 'Central', 'State'].map((tab) => (
              <button
                key={tab}
-               onClick={() => setActiveTab(tab as any)}
+               onClick={() => setActiveTab(tab)}
                className={`px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                  activeTab === tab 
                    ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' 
                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                }`}
              >
-               {tab === 'All' ? 'All Schemes' : tab === SchemeType.CENTRAL ? 'Central Govt' : `${user.location} Govt`}
+               {tab === 'All' ? 'All Schemes' : tab === 'Central' ? 'Central Govt' : `${user.location} Govt`}
              </button>
           ))}
         </div>
@@ -504,7 +499,7 @@ const App: React.FC = () => {
                 onClick={(s) => {
                   setSelectedScheme(s);
                   setView('SCHEME_DETAILS');
-                  setIsChatOpen(false); // Reset chat state
+                  setIsChatOpen(false);
                 }} 
               />
             ))}
