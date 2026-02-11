@@ -1,5 +1,3 @@
-// --- types.ts (The Crash Fixer) ---
-
 export interface UserProfile {
   name: string;
   age: number;
@@ -8,7 +6,8 @@ export interface UserProfile {
   isLoggedIn: boolean;
 }
 
-// 1. We define SchemeType as a REAL OBJECT so it never says "undefined"
+// THIS IS THE FIX: We define SchemeType as a real object.
+// Any file looking for "SchemeType.EDUCATION" will now find it here.
 export const SchemeType = {
   CENTRAL: 'Central',
   STATE: 'State',
@@ -21,18 +20,17 @@ export const SchemeType = {
   OTHER: 'Other'
 } as const;
 
-// 2. We also export it as a Type for TypeScript
 export type SchemeType = typeof SchemeType[keyof typeof SchemeType] | string;
 
 export interface Scheme {
   id: string;
   title: string;
-  provider: string; // "Central Govt" or "Odisha Govt"
-  type: string;     // Just a simple string now
+  provider: string;
+  type: string;
   description: string;
   eligibility: string[];
   benefits: string[];
-  applicationProcess?: string[]; // Optional
+  applicationProcess?: string[];
   tags: string[];
   minAge?: number;
   maxAge?: number;
