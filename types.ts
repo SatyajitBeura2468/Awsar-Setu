@@ -1,35 +1,42 @@
+// --- types.ts (The Crash Fixer) ---
+
 export interface UserProfile {
   name: string;
   age: number;
-  location: string; // State name
+  location: string;
   notificationsEnabled: boolean;
   isLoggedIn: boolean;
 }
 
-export enum SchemeType {
-  CENTRAL = 'Central',
-  STATE = 'State',
-}
+// 1. We define SchemeType as a REAL OBJECT so it never says "undefined"
+export const SchemeType = {
+  CENTRAL: 'Central',
+  STATE: 'State',
+  EDUCATION: 'Education',
+  HEALTH: 'Health',
+  BUSINESS: 'Business',
+  FARMERS: 'Farmers',
+  WOMEN: 'Women',
+  SC_ST: 'SC/ST',
+  OTHER: 'Other'
+} as const;
+
+// 2. We also export it as a Type for TypeScript
+export type SchemeType = typeof SchemeType[keyof typeof SchemeType] | string;
 
 export interface Scheme {
   id: string;
   title: string;
-  type: SchemeType;
-  state?: string; // If type is STATE
+  provider: string; // "Central Govt" or "Odisha Govt"
+  type: string;     // Just a simple string now
   description: string;
-  benefits: string[];
   eligibility: string[];
-  applicationProcess: string[];
+  benefits: string[];
+  applicationProcess?: string[]; // Optional
   tags: string[];
   minAge?: number;
   maxAge?: number;
-}
-
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'model';
-  text: string;
-  timestamp: number;
+  state?: string;
 }
 
 export type ViewState = 'ONBOARDING' | 'DASHBOARD' | 'SCHEME_DETAILS';
