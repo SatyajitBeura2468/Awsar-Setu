@@ -8,7 +8,6 @@ export const INDIAN_STATES = [
   "Uttarakhand", "West Bengal", "Delhi", "Jammu and Kashmir", "Ladakh"
 ];
 
-// Simple, crash-proof mock data
 export const MOCK_SCHEMES: Scheme[] = [
   {
     id: "mock-1",
