@@ -1,6 +1,6 @@
 import React from 'react';
+import { ChevronRight, ArrowRight } from 'lucide-react';
 import { Scheme } from './types';
-import { ArrowRight, MapPin, Building2, ShieldCheck } from 'lucide-react';
 
 interface SchemeCardProps {
   scheme: Scheme;
@@ -11,47 +11,33 @@ const SchemeCard: React.FC<SchemeCardProps> = ({ scheme, onClick }) => {
   return (
     <div 
       onClick={() => onClick(scheme)}
-      className="group bg-white p-5 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-brand-200 transition-all duration-300 cursor-pointer relative overflow-hidden"
+      className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md hover:border-brand-200 transition-all cursor-pointer relative overflow-hidden"
     >
-      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-500 to-brand-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      <div className="flex justify-between items-start mb-3">
-        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${
-          scheme.type === SchemeType.CENTRAL 
-            ? 'bg-blue-50 text-blue-700 border border-blue-100' 
-            : 'bg-orange-50 text-orange-700 border border-orange-100'
-        }`}>
-          {scheme.type === SchemeType.CENTRAL ? 'National' : scheme.state}
-        </span>
-        <div className="flex gap-1">
-          {scheme.tags.slice(0, 2).map((tag, i) => (
-             <span key={i} className="text-[10px] text-slate-500 bg-slate-50 px-2 py-1 rounded-md">#{tag}</span>
-          ))}
-        </div>
+      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+        <ArrowRight size={40} className="-rotate-45 text-brand-500" />
       </div>
 
-      <h3 className="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-brand-600 transition-colors">
+      <div className="flex justify-between items-start mb-3">
+        <span className="px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold uppercase tracking-wider">
+          {scheme.type}
+        </span>
+        {scheme.provider && (
+           <span className="text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
+             {scheme.provider}
+           </span>
+        )}
+      </div>
+
+      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">
         {scheme.title}
       </h3>
       
-      <p className="text-sm text-slate-500 line-clamp-2 mb-4">
+      <p className="text-slate-500 text-sm mb-4 line-clamp-2 leading-relaxed">
         {scheme.description}
       </p>
 
-      <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
-        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-           {scheme.type === SchemeType.CENTRAL ? <Building2 size={14} /> : <MapPin size={14} />}
-           <span>{scheme.type === SchemeType.CENTRAL ? 'Govt of India' : `Govt of ${scheme.state}`}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-            <span className="text-[10px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                <ShieldCheck size={10} /> Verified
-            </span>
-            <button className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-500 group-hover:text-white transition-colors">
-              <ArrowRight size={16} />
-            </button>
-        </div>
+      <div className="flex items-center text-brand-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+        View Details <ChevronRight size={16} className="ml-1" />
       </div>
     </div>
   );
