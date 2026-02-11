@@ -1,12 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-// Notice: We removed SchemeType to fix the crash
 import { Scheme, UserProfile } from './types';
 
 // --- CONFIGURATION ---
-// This safely grabs the key from Vite
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 
-// Initialize AI only if key exists
 let model: any = null;
 if (API_KEY) {
   const genAI = new GoogleGenerativeAI(API_KEY);
@@ -14,14 +11,12 @@ if (API_KEY) {
 }
 
 // --- HELPER: Clean AI Response ---
-// This strips markdown (```json) to prevent crashing
 const cleanJSON = (text: string) => {
   return text.replace(/```json/g, "").replace(/```/g, "").trim();
 };
 
-// --- FUNCTION 1: Get Schemes ---
-export const getSchemes = async (userProfile: UserProfile): Promise<Scheme[]> => {
-  // 1. Check if API Key is missing or invalid
+// --- FUNCTION 1: fetchLiveSchemes (Renamed to match App.tsx) ---
+export const fetchLiveSchemes = async (userProfile: UserProfile): Promise<Scheme[]> => {
   if (!API_KEY || !model) {
     console.warn("Using Demo Data (Missing API Key)");
     return getDemoSchemes();
@@ -60,12 +55,24 @@ export const getSchemes = async (userProfile: UserProfile): Promise<Scheme[]> =>
 
   } catch (error) {
     console.error("AI Error:", error);
-    // FALLBACK: If AI fails, return Demo Data so app doesn't crash
     return getDemoSchemes();
   }
 };
 
-// --- FUNCTION 2: Chat ---
+// --- FUNCTION 2: fetchSchemeDetails (Added to satisfy App.tsx) ---
+export const fetchSchemeDetails = async (scheme: Scheme): Promise<string> => {
+  if (!API_KEY || !model) return "Demo Details: Please add API Key to see real AI analysis.";
+  
+  try {
+    const prompt = `Give me a detailed 3-line summary of the scheme: ${scheme.title} (${scheme.provider}).`;
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (error) {
+    return "Could not fetch details.";
+  }
+};
+
+// --- FUNCTION 3: chatWithGemini ---
 export const chatWithGemini = async (
   userMessage: string,
   schemeContext: any,
@@ -90,8 +97,7 @@ export const chatWithGemini = async (
   }
 };
 
-// --- DEMO DATA (Safety Net) ---
-// This shows up ONLY if the API Key is wrong/missing
+// --- DEMO DATA ---
 const getDemoSchemes = (): Scheme[] => [
   {
     id: "demo-1",
