@@ -7,7 +7,8 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
 let model: any = null;
 if (API_KEY) {
   const genAI = new GoogleGenerativeAI(API_KEY);
-  model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // FIX: Using 'gemini-pro' because it is the most stable model
+  model = genAI.getGenerativeModel({ model: "gemini-pro" });
 }
 
 // --- HELPER: Clean AI Response ---
@@ -15,8 +16,9 @@ const cleanJSON = (text: string) => {
   return text.replace(/```json/g, "").replace(/```/g, "").trim();
 };
 
-// --- FUNCTION 1: fetchLiveSchemes (Renamed to match App.tsx) ---
+// --- FUNCTION 1: fetchLiveSchemes ---
 export const fetchLiveSchemes = async (userProfile: UserProfile): Promise<Scheme[]> => {
+  // Check if API Key or Model is missing
   if (!API_KEY || !model) {
     console.warn("Using Demo Data (Missing API Key)");
     return getDemoSchemes();
@@ -37,11 +39,12 @@ export const fetchLiveSchemes = async (userProfile: UserProfile): Promise<Scheme
         {
           "id": "1",
           "title": "Scheme Name",
-          "provider": "Central or State Govt",
-          "type": "Education/Health/Business", 
+          "provider": "Central Govt", 
+          "type": "Education", 
           "description": "Short description (max 20 words)",
-          "eligibility": "One line eligibility",
-          "benefits": "One line benefits"
+          "eligibility": ["One line eligibility"],
+          "benefits": ["One line benefits"],
+          "tags": ["Tag1", "Tag2"]
         }
       ]
       IMPORTANT: Return ONLY the raw JSON. No markdown.
@@ -59,7 +62,7 @@ export const fetchLiveSchemes = async (userProfile: UserProfile): Promise<Scheme
   }
 };
 
-// --- FUNCTION 2: fetchSchemeDetails (Added to satisfy App.tsx) ---
+// --- FUNCTION 2: fetchSchemeDetails ---
 export const fetchSchemeDetails = async (scheme: Scheme): Promise<string> => {
   if (!API_KEY || !model) return "Demo Details: Please add API Key to see real AI analysis.";
   
@@ -97,24 +100,26 @@ export const chatWithGemini = async (
   }
 };
 
-// --- DEMO DATA ---
+// --- DEMO DATA (Fallback) ---
 const getDemoSchemes = (): Scheme[] => [
   {
     id: "demo-1",
     title: "National Scholarship Portal (Demo)",
     provider: "Central Govt",
     type: "Education",
-    description: "System Alert: API Key is invalid. This is demo data.",
-    eligibility: "Students above 18",
-    benefits: "₹10,000 per year"
+    description: "System Alert: API connection failed. Showing demo data.",
+    eligibility: ["Students above 18"],
+    benefits: ["₹10,000 per year"],
+    tags: ["Education", "Scholarship"]
   },
   {
     id: "demo-2",
     title: "Odisha State Scholarship (Demo)",
     provider: "Odisha Govt",
     type: "Education",
-    description: "Please fix Vercel Environment Variables to see real data.",
-    eligibility: "Residents of Odisha",
-    benefits: "Tuition waiver"
+    description: "Please check console for details.",
+    eligibility: ["Residents of Odisha"],
+    benefits: ["Tuition waiver"],
+    tags: ["Education", "Odisha"]
   }
 ];
