@@ -1,56 +1,51 @@
-# 🇮🇳 Awsar Setu (Project Vishwa Shakti)
-> **India's First AI-Powered Rights Discovery Platform.**
-> *Bridging 1.4 Billion Citizens to their Constitutional Benefits.*
+# AwsarSetu
 
-![Status](https://img.shields.io/badge/Status-Beta_Live-green?style=for-the-badge)
-![Powered By](https://img.shields.io/badge/Supported_By-Odisha_Govt-0072C6?style=for-the-badge)
-![Focus](https://img.shields.io/badge/Focus-Pan_India_Welfare-FF9933?style=for-the-badge)
+AwsarSetu is an independent, citizen-first opportunity discovery platform for India.
 
----
+Core promise: **Find opportunities made for your next step.**
 
-## 🚀 The Vision
-Billions of rupees in government funds go unutilized every year simply because citizens don't know they are eligible. **Awsar Setu** changes that.
+It helps people browse scholarships, jobs, vacancies, schemes, training and support without forcing sign-in. Accounts are optional for syncing saves, application tracking, profile-based matches and quiet notifications.
 
-We are building a **Digital Public Infrastructure (DPI)** that acts as a bridge between the Government's intent and the Citizen's benefit. Whether you are a farmer in Kalahandi or a student in Mumbai, Awsar Setu ensures you never miss an opportunity that is your right.
+AwsarSetu is not a government website, official authority, partner or endorsement channel.
 
----
+## Stack
 
-## ⚡ Current Capabilities (Live)
-Our "Alpha" version is already changing lives with these core features:
+- Next.js App Router with TypeScript
+- Tailwind CSS
+- Supabase Auth, PostgreSQL and Row Level Security
+- Resend email abstraction
+- Web Push with VAPID and a service worker
+- Vitest and Playwright
+- Local bundled Noto Sans and Noto Sans Devanagari fonts
 
-### 🎯 **Smart Eligibility Engine**
--   **Hyper-Personalized:** Matches your profile (Age, Caste, Income, Land Holding) against 500+ Central & State schemes.
--   **No Noise:** Filters out schemes you *can't* get. Shows only what you *deserve*.
+## Local Setup
 
-### 🏛️ **Dual-Engine Search**
--   **Pan-India Coverage:** Seamlessly integrates **Central Govt Schemes** (PM-Kisan, Ayushman Bharat) with **State Specific Schemes** (Odisha's KALIA, Subhadra Yojana).
+```bash
+pnpm install --ignore-scripts
+cp .env.example .env.local
+pnpm dev
+```
 
-### 🧠 **Grounded AI Advisor**
--   **Zero-Hallucination:** Uses **RAG (Retrieval-Augmented Generation)** to fetch answers strictly from official Government Notifications.
--   **Simplification:** Translates complex bureaucratic legal terms into simple, actionable advice.
+Open `http://localhost:3000`.
 
----
+## Quality Commands
 
-## 🔮 The Roadmap (Coming Soon)
-We are currently developing advanced modules to reach the "Last Mile":
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm content:validate
+pnpm build
+pnpm test:e2e
+```
 
-* **🎙️ Project "Vaani" (Native Voice Interface):**
-    * Breaking literacy barriers with full speech-to-speech support in **Kalahandia, Sambalpuri,** and 12+ regional dialects. *[In Development]*
-* **📂 DigiLocker Integration:**
-    * One-click document verification and direct application submission.
-* **📶 SMS Bridge (Offline Mode):**
-    * Bringing Awsar Setu to feature phones (non-smartphones) via SMS/USSD for deep rural connectivity.
+## Deployment
 
----
+1. Create a Supabase project and run `supabase/migrations/0001_initial_schema.sql`.
+2. Add production environment variables from `.env.example`.
+3. Configure Supabase Auth providers for email/password, phone OTP and optional Google OAuth.
+4. Add Resend credentials if email alerts are enabled.
+5. Add VAPID keys for browser notifications.
+6. Deploy to Vercel, Netlify or another Next.js-capable host.
 
-## 🛠️ Tech Stack
-* **Core Brain:** Advanced Large Language Model (Fine-Tuned on Govt Data)
-* **Frontend:** React (TypeScript) + Vite
-* **Styling:** Tailwind CSS
-* **Deployment:** Vercel Edge Network
-
----
-
-### 🤝 Join the Movement
-This is not just code; it is nation-building.
-**Built with ❤️ for India by [Satyajit Beura].**
+Detailed setup lives in `docs/deployment.md` and `docs/auth-setup.md`.

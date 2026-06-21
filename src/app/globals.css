@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #fff8ef;
+  --hero: #fff3df;
+  --surface: #ffffff;
+  --mist: #f1f5f2;
+  --ink: #082f49;
+  --slate: #526474;
+  --border: #e6ded2;
+  --teal: #0f9488;
+  --teal-dark: #0b6d65;
+  --saffron: #f5a524;
+  --coral: #f9735b;
+  --mint: #dff8ee;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-hero: var(--hero);
+  --color-surface: var(--surface);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-slate: var(--slate);
+  --color-border: var(--border);
+  --color-teal: var(--teal);
+  --color-teal-dark: var(--teal-dark);
+  --color-saffron: var(--saffron);
+  --color-coral: var(--coral);
+  --color-mint: var(--mint);
+  --shadow-soft: 0 12px 36px rgba(8, 47, 73, 0.08);
+  --shadow-card: 0 22px 60px rgba(8, 47, 73, 0.14);
+  --font-sans: "Noto Sans Variable", "Noto Sans Devanagari Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", "Cascadia Code", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family:
+    "Noto Sans Variable",
+    "Noto Sans Devanagari Variable",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(15, 148, 136, 0.2);
+}
+
+a {
+  text-decoration-thickness: 0.08em;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

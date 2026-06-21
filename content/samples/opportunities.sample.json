@@ -1,0 +1,31 @@
+[
+  {
+    "title": "Official scholarship record title",
+    "slug": "official-scholarship-record-title",
+    "category": "education-scholarships",
+    "description": "Replace this sample with a real official-source record after review. This file defines the import shape only.",
+    "visualCover": "education",
+    "organisation": "Official organisation name",
+    "officialUrl": "https://scholarships.gov.in/",
+    "officialActionLabel": "Continue to Official Portal",
+    "scope": { "kind": "national" },
+    "deadline": null,
+    "benefitType": "financial-support",
+    "eligibilitySummary": "Eligibility summary from the official source.",
+    "eligibilityTags": {
+      "education": ["class-12"],
+      "roles": ["student"],
+      "interests": ["education-scholarships"]
+    },
+    "educationRequirements": ["class-12"],
+    "documents": ["Officially listed document"],
+    "whatItOffers": ["Officially listed benefit"],
+    "whoCanApply": ["Officially listed eligible group"],
+    "importantConditions": ["Officially listed condition"],
+    "howToApply": ["Officially listed application step"],
+    "lastChecked": "2026-06-22",
+    "verificationStatus": "development-sample",
+    "sourceDomain": "scholarships.gov.in",
+    "expired": false
+  }
+]

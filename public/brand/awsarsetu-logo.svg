@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">AwsarSetu temporary connected-node mark</title>
+  <desc id="desc">A bridge-like network of connected nodes in navy, teal and saffron.</desc>
+  <rect width="96" height="96" rx="24" fill="#082F49"/>
+  <path d="M22 57c10-19 26-30 52-32" fill="none" stroke="#F59E0B" stroke-width="7" stroke-linecap="round"/>
+  <path d="M22 57c13 3 25 3 35-1 8-3 13-8 17-15" fill="none" stroke="#2DD4BF" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="22" cy="57" r="8" fill="#FFF7ED"/>
+  <circle cx="48" cy="36" r="7" fill="#F97316"/>
+  <circle cx="74" cy="25" r="8" fill="#99F6E4"/>
+  <circle cx="57" cy="56" r="6" fill="#FFFFFF"/>
+  <path d="M28 69h40" stroke="#E0F2FE" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+</svg>

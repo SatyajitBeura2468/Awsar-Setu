@@ -1,0 +1,19 @@
+{
+  "name": "AwsarSetu",
+  "short_name": "AwsarSetu",
+  "description": "Find scholarships, jobs, vacancies, schemes, training and support in one clear place.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFF8EF",
+  "theme_color": "#FFF8EF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/brand/awsarsetu-logo.svg",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
