@@ -4,15 +4,18 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { ApplicationStatus, SavedOpportunity } from "@/lib/types";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const storageKey = "awsarsetu-saved";
+const savedChangeEvent = "awsarsetu-saved-change";
+const emptySavedItems: SavedOpportunity[] = [];
+let cachedRawValue: string | null = null;
+let cachedSavedItems: SavedOpportunity[] = emptySavedItems;
 
 interface SavedContextValue {
   savedItems: SavedOpportunity[];
@@ -42,33 +45,67 @@ function parseSaved(value: string | null): SavedOpportunity[] {
   }
 }
 
-export function SavedProvider({ children }: { children: ReactNode }) {
-  const [savedItems, setSavedItems] = useState<SavedOpportunity[]>(() => {
-    if (typeof window === "undefined") return [];
-    return parseSaved(window.localStorage.getItem(storageKey));
-  });
+function getSavedSnapshot() {
+  if (typeof window === "undefined") return emptySavedItems;
+  const rawValue = window.localStorage.getItem(storageKey);
+  if (rawValue === cachedRawValue) return cachedSavedItems;
+  cachedRawValue = rawValue;
+  cachedSavedItems = parseSaved(rawValue);
+  return cachedSavedItems;
+}
 
-  useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(savedItems));
-  }, [savedItems]);
+function getServerSavedSnapshot() {
+  return emptySavedItems;
+}
+
+function subscribeSavedItems(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === storageKey) callback();
+  };
+  const handleLocalChange = () => callback();
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(savedChangeEvent, handleLocalChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(savedChangeEvent, handleLocalChange);
+  };
+}
+
+function writeSavedItems(items: SavedOpportunity[]) {
+  if (typeof window === "undefined") return;
+  cachedRawValue = JSON.stringify(items);
+  cachedSavedItems = items;
+  window.localStorage.setItem(storageKey, cachedRawValue);
+  window.dispatchEvent(new Event(savedChangeEvent));
+}
+
+export function SavedProvider({ children }: { children: ReactNode }) {
+  const savedItems = useSyncExternalStore(
+    subscribeSavedItems,
+    getSavedSnapshot,
+    getServerSavedSnapshot,
+  );
 
   const toggleSaved = useCallback(async (opportunityId: string) => {
-    setSavedItems((items) => {
-      const existing = items.find((item) => item.opportunityId === opportunityId);
-      if (existing) {
-        return items.filter((item) => item.opportunityId !== opportunityId);
-      }
-
-      return [
-        ...items,
-        {
-          opportunityId,
-          status: "saved",
-          notes: "",
-          savedAt: new Date().toISOString(),
-        },
-      ];
-    });
+    const items = getSavedSnapshot();
+    const existing = items.find((item) => item.opportunityId === opportunityId);
+    writeSavedItems(
+      existing
+        ? items.filter((item) => item.opportunityId !== opportunityId)
+        : [
+            ...items,
+            {
+              opportunityId,
+              status: "saved",
+              notes: "",
+              savedAt: new Date().toISOString(),
+            },
+          ],
+    );
 
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
@@ -103,8 +140,8 @@ export function SavedProvider({ children }: { children: ReactNode }) {
         Pick<SavedOpportunity, "notes" | "reminderDate" | "status">
       >,
     ) => {
-      setSavedItems((items) =>
-        items.map((item) =>
+      writeSavedItems(
+        getSavedSnapshot().map((item) =>
           item.opportunityId === opportunityId
             ? {
                 ...item,

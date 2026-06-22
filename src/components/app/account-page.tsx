@@ -29,26 +29,29 @@ export function AccountPage() {
   };
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[2rem] border border-border bg-white p-6 shadow-soft md:p-8">
+    <div className="space-y-8">
+      <section className="surface-glass relative overflow-hidden rounded-[2rem] p-6 md:p-8">
+        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 h-32 w-32 rounded-full bg-saffron/20 blur-3xl" />
         <p className="text-sm font-black uppercase tracking-[0.16em] text-teal">
           {t("account")}
         </p>
-        <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-tight text-ink md:text-5xl">
+        <h1 className="relative mt-3 max-w-3xl text-3xl font-black tracking-tight text-ink md:text-5xl">
           {t("accountBenefit")}
         </h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-slate">
-          Accounts are optional. You can browse, search, open official links and
-          save locally without signing in.
+        <p className="relative mt-4 max-w-3xl text-base leading-7 text-slate">
+          Sign in only when you want synced saves, profile-shaped matches and
+          quiet reminders. Searching and opening official sources stays open to
+          everyone.
         </p>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <AuthPanel />
 
-        <section className="rounded-[1.5rem] border border-border bg-white p-5 shadow-soft md:p-6">
+        <section className="surface-glass rounded-[1.5rem] p-5 md:p-6">
           <div className="flex items-start gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-mint text-teal-dark">
+            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-mint to-white text-teal-dark shadow-soft">
               <UserRoundCog className="h-6 w-6" aria-hidden="true" />
             </span>
             <div>
@@ -113,8 +116,8 @@ export function AccountPage() {
                   onClick={() => toggleInterest(category)}
                   className={`rounded-full border px-4 py-2 text-sm font-bold ${
                     interests.includes(category)
-                      ? "border-teal bg-mint text-teal-dark"
-                      : "border-border bg-canvas text-slate"
+                      ? "border-teal bg-mint text-teal-dark shadow-soft"
+                      : "border-white/80 bg-white/72 text-slate hover:border-teal"
                   }`}
                 >
                   {categoryLabels[category][locale]}
@@ -125,9 +128,9 @@ export function AccountPage() {
         </section>
       </div>
 
-      <section className="rounded-[1.5rem] border border-border bg-white p-5 shadow-soft md:p-6">
+      <section className="surface-glass rounded-[1.5rem] p-5 md:p-6">
         <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-saffron/20 text-coral">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-saffron/30 to-white text-coral shadow-soft">
             <BellRing className="h-6 w-6" aria-hidden="true" />
           </span>
           <div>
@@ -151,7 +154,7 @@ export function AccountPage() {
           ].map((item) => (
             <label
               key={item}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-border bg-canvas p-4 text-sm font-bold text-ink"
+              className="dock-item flex items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/72 p-4 text-sm font-bold text-ink shadow-soft transition hover:-translate-y-0.5"
             >
               {item}
               <input type="checkbox" className="h-5 w-5 accent-teal" />
@@ -175,7 +178,7 @@ function ProfileSelect({
       <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
         {label}
       </span>
-      <select className="rounded-2xl border border-border bg-canvas px-4 py-3 text-sm font-bold text-ink outline-none focus:border-teal">
+      <select className="rounded-2xl border border-white/80 bg-white/78 px-4 py-3 text-sm font-bold text-ink shadow-soft outline-none transition focus:border-teal focus:bg-white">
         {children}
       </select>
     </label>

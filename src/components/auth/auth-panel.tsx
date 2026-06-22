@@ -61,9 +61,9 @@ export function AuthPanel() {
   };
 
   return (
-    <section className="rounded-[1.5rem] border border-border bg-white p-5 shadow-soft md:p-6">
+    <section className="surface-glass rounded-[1.5rem] p-5 md:p-6">
       <div className="flex items-start gap-4">
-        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-mint text-teal-dark">
+        <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-mint to-white text-teal-dark shadow-soft">
           <ShieldCheck className="h-6 w-6" aria-hidden="true" />
         </span>
         <div>
@@ -80,12 +80,14 @@ export function AuthPanel() {
         </div>
       )}
 
-      <div className="mt-5 flex rounded-full border border-border bg-canvas p-1">
+      <div className="mt-5 flex rounded-full border border-white/80 bg-white/70 p-1 shadow-soft">
         <button
           type="button"
           onClick={() => setMode("email")}
           className={`flex-1 rounded-full px-4 py-2 text-sm font-black ${
-            mode === "email" ? "bg-ink text-white" : "text-slate"
+            mode === "email"
+              ? "bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
+              : "text-slate"
           }`}
         >
           Email
@@ -94,7 +96,9 @@ export function AuthPanel() {
           type="button"
           onClick={() => setMode("phone")}
           className={`flex-1 rounded-full px-4 py-2 text-sm font-black ${
-            mode === "phone" ? "bg-ink text-white" : "text-slate"
+            mode === "phone"
+              ? "bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
+              : "text-slate"
           }`}
         >
           Phone OTP
@@ -105,7 +109,7 @@ export function AuthPanel() {
         <div className="mt-5 grid gap-3">
           <label className="grid gap-2 text-sm font-bold text-slate">
             {t("email")}
-            <span className="flex items-center gap-3 rounded-2xl border border-border bg-canvas px-4 py-3">
+            <span className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/78 px-4 py-3 shadow-soft">
               <Mail className="h-4 w-4 text-teal" aria-hidden="true" />
               <input
                 value={email}
@@ -121,13 +125,13 @@ export function AuthPanel() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               type="password"
-              className="rounded-2xl border border-border bg-canvas px-4 py-3 text-ink outline-none"
+              className="rounded-2xl border border-white/80 bg-white/78 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
             />
           </label>
           <button
             type="button"
             onClick={() => void signInWithEmail()}
-            className="rounded-2xl bg-ink px-5 py-3 text-sm font-black text-white"
+            className="rounded-2xl bg-gradient-to-r from-ink to-peacock px-5 py-3 text-sm font-black text-white shadow-glow transition hover:-translate-y-0.5"
           >
             Sign in with email
           </button>
@@ -136,7 +140,7 @@ export function AuthPanel() {
         <div className="mt-5 grid gap-3">
           <label className="grid gap-2 text-sm font-bold text-slate">
             {t("phone")}
-            <span className="flex items-center gap-3 rounded-2xl border border-border bg-canvas px-4 py-3">
+            <span className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/78 px-4 py-3 shadow-soft">
               <Phone className="h-4 w-4 text-teal" aria-hidden="true" />
               <input
                 value={phone}
@@ -149,7 +153,7 @@ export function AuthPanel() {
           <button
             type="button"
             onClick={() => void signInWithPhone()}
-            className="rounded-2xl bg-ink px-5 py-3 text-sm font-black text-white"
+            className="rounded-2xl bg-gradient-to-r from-ink to-peacock px-5 py-3 text-sm font-black text-white shadow-glow transition hover:-translate-y-0.5"
           >
             Send OTP
           </button>
@@ -159,7 +163,7 @@ export function AuthPanel() {
       <button
         type="button"
         onClick={() => void signInWithGoogle()}
-        className="mt-3 w-full rounded-2xl border border-border bg-white px-5 py-3 text-sm font-black text-ink shadow-soft"
+        className="mt-3 w-full rounded-2xl border border-white/80 bg-white/86 px-5 py-3 text-sm font-black text-ink shadow-soft transition hover:-translate-y-0.5 hover:border-teal"
       >
         {t("continueGoogle")}
       </button>

@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { copy, defaultLocale, type Locale } from "@/lib/i18n";
 
 interface LanguageContextValue {
@@ -10,22 +18,68 @@ interface LanguageContextValue {
 }
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
+const localeStorageKey = "awsarsetu-locale";
+const localeChangeEvent = "awsarsetu-locale-change";
+let cachedLocaleRaw: string | null = null;
+let cachedLocale: Locale = defaultLocale;
+
+function parseLocale(value: string | null): Locale {
+  return value === "en" || value === "hi" ? value : defaultLocale;
+}
+
+function getLocaleSnapshot() {
+  if (typeof window === "undefined") return defaultLocale;
+  const rawValue = window.localStorage.getItem(localeStorageKey);
+  if (rawValue === cachedLocaleRaw) return cachedLocale;
+  cachedLocaleRaw = rawValue;
+  cachedLocale = parseLocale(rawValue);
+  return cachedLocale;
+}
+
+function getServerLocaleSnapshot() {
+  return defaultLocale;
+}
+
+function subscribeLocale(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === localeStorageKey) callback();
+  };
+  const handleLocalChange = () => callback();
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(localeChangeEvent, handleLocalChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(localeChangeEvent, handleLocalChange);
+  };
+}
+
+function writeLocale(nextLocale: Locale) {
+  if (typeof window === "undefined") return;
+  cachedLocaleRaw = nextLocale;
+  cachedLocale = nextLocale;
+  window.localStorage.setItem(localeStorageKey, nextLocale);
+  window.dispatchEvent(new Event(localeChangeEvent));
+}
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => {
-    if (typeof window === "undefined") return defaultLocale;
-    const savedLocale = window.localStorage.getItem("awsarsetu-locale");
-    if (savedLocale === "en" || savedLocale === "hi") {
-      return savedLocale;
-    }
-    return defaultLocale;
-  });
+  const locale = useSyncExternalStore(
+    subscribeLocale,
+    getLocaleSnapshot,
+    getServerLocaleSnapshot,
+  );
 
-  const setLocale = (nextLocale: Locale) => {
-    setLocaleState(nextLocale);
-    window.localStorage.setItem("awsarsetu-locale", nextLocale);
+  useEffect(() => {
+    document.documentElement.lang = locale === "hi" ? "hi" : "en";
+  }, [locale]);
+
+  const setLocale = useCallback((nextLocale: Locale) => {
+    writeLocale(nextLocale);
     document.documentElement.lang = nextLocale === "hi" ? "hi" : "en";
-  };
+  }, []);
 
   const value = useMemo<LanguageContextValue>(
     () => ({
@@ -33,7 +87,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       setLocale,
       t: (key) => copy[locale][key] ?? copy.en[key],
     }),
-    [locale],
+    [locale, setLocale],
   );
 
   return (

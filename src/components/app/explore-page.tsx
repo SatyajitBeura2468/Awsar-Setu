@@ -134,24 +134,25 @@ export function ExplorePage() {
 
   return (
     <div className="space-y-7">
-      <section className="rounded-[2rem] border border-border bg-white p-5 shadow-soft md:p-7">
+      <section className="surface-glass relative overflow-hidden rounded-[2rem] p-5 md:p-8">
+        <div className="absolute -right-16 -top-24 h-56 w-56 rounded-full bg-peacock/10 blur-3xl" />
+        <div className="absolute -bottom-20 left-28 h-52 w-52 rounded-full bg-saffron/20 blur-3xl" />
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-3xl font-black tracking-tight text-ink md:text-5xl">
               {t("explore")}
             </h1>
-            <p className="mt-3 max-w-2xl text-base leading-7 text-slate">
-              Search and filter opportunities. AwsarSetu can suggest likely
-              matches, but final eligibility always belongs to the official
-              criteria.
+            <p className="mt-3 max-w-2xl text-base font-medium leading-7 text-slate">
+              Shape the discovery space by category, state, deadline and
+              profile signals. Match labels stay careful by design.
             </p>
           </div>
-          <div className="flex rounded-full border border-border bg-canvas p-1">
+          <div className="relative z-10 flex rounded-full border border-white/80 bg-white/76 p-1 shadow-soft">
             <button
               type="button"
               onClick={() => setForYou(false)}
               className={`rounded-full px-4 py-2 text-sm font-black ${
-                !forYou ? "bg-ink text-white" : "text-slate"
+                !forYou ? "bg-gradient-to-r from-ink to-peacock text-white" : "text-slate"
               }`}
             >
               All Opportunities
@@ -160,7 +161,7 @@ export function ExplorePage() {
               type="button"
               onClick={() => setForYou(true)}
               className={`rounded-full px-4 py-2 text-sm font-black ${
-                forYou ? "bg-ink text-white" : "text-slate"
+                forYou ? "bg-gradient-to-r from-ink to-peacock text-white" : "text-slate"
               }`}
             >
               For You
@@ -168,8 +169,8 @@ export function ExplorePage() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-3 rounded-[1.35rem] border border-border bg-canvas p-3 md:flex-row md:items-center">
-          <div className="flex flex-1 items-center gap-3 rounded-2xl bg-white px-4 py-3">
+        <div className="magnetic-search relative z-10 mt-6 flex flex-col gap-3 rounded-[1.45rem] border border-white bg-white/88 p-3 md:flex-row md:items-center">
+          <div className="relative z-10 flex flex-1 items-center gap-3 rounded-2xl bg-white/92 px-4 py-3">
             <Search className="h-5 w-5 text-teal" aria-hidden="true" />
             <input
               value={query}
@@ -181,7 +182,7 @@ export function ExplorePage() {
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as Sort)}
-            className="rounded-2xl border border-border bg-white px-4 py-3 text-sm font-bold text-ink outline-none"
+            className="relative z-10 rounded-2xl border border-white/90 bg-white px-4 py-3 text-sm font-black text-ink outline-none"
             aria-label="Sort opportunities"
           >
             <option value="newest">Newest</option>
@@ -197,7 +198,7 @@ export function ExplorePage() {
                 key={suggestion}
                 type="button"
                 onClick={() => setQuery(suggestion)}
-                className="rounded-full border border-border bg-white px-4 py-2 font-bold text-slate hover:border-teal hover:text-ink"
+                className="rounded-full border border-white/80 bg-white/74 px-4 py-2 font-bold text-slate shadow-soft backdrop-blur hover:border-teal hover:text-ink"
               >
                 {suggestion}
               </button>
@@ -207,9 +208,11 @@ export function ExplorePage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[19rem_1fr]">
-        <aside className="h-fit rounded-[1.5rem] border border-border bg-white p-5 shadow-soft lg:sticky lg:top-24">
-          <div className="mb-4 flex items-center gap-2 text-lg font-black text-ink">
-            <SlidersHorizontal className="h-5 w-5 text-teal" />
+        <aside className="surface-glass h-fit rounded-[1.5rem] p-5 lg:sticky lg:top-24">
+        <div className="mb-4 flex items-center gap-2 text-lg font-black text-ink">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-mint to-white text-teal shadow-soft">
+              <SlidersHorizontal className="h-5 w-5" />
+            </span>
             Filters
           </div>
           <div className="space-y-4">
@@ -278,7 +281,7 @@ export function ExplorePage() {
           </div>
         </aside>
 
-        <section>
+        <section className="relative">
           <div className="mb-4 flex items-center justify-between gap-4">
             <p className="text-sm font-bold text-slate">
               {results.length} results. {t("likelyHint")}
@@ -323,13 +326,13 @@ function FilterSelect<T extends string>({
 }) {
   return (
     <label className="grid gap-2">
-      <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
+        <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
         {label}
       </span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className="rounded-2xl border border-border bg-canvas px-4 py-3 text-sm font-bold text-ink outline-none focus:border-teal"
+        className="rounded-2xl border border-white/80 bg-white/82 px-4 py-3 text-sm font-black text-ink shadow-soft outline-none backdrop-blur focus:border-teal"
       >
         {children}
       </select>

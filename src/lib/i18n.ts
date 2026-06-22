@@ -83,7 +83,7 @@ export const copy = {
     account: "Account",
     matchesForYou: "Matches for You",
     matchesGuest:
-      "Tell AwsarSetu your state, age, education and interests to see more relevant matches. Browsing stays open without sign-in.",
+      "Set a lightweight profile when you want sharper matches. Discovery, search and official links stay open either way.",
     governmentJobs: "Government Jobs and Vacancies",
     closingSoon: "Closing Soon",
     exploreByNeed: "Explore by Need",
@@ -101,7 +101,7 @@ export const copy = {
     check: "Check Criteria",
     likelyHint:
       "Likely a match based on your profile. Please verify the official eligibility criteria before applying.",
-    browseFirst: "Browse-first, sign-in optional",
+    browseFirst: "Open discovery, account tools when useful",
     accountBenefit:
       "Save opportunities, track applications and receive alerts for openings that may fit you.",
     signIn: "Sign in",
@@ -113,7 +113,7 @@ export const copy = {
     developmentNotice:
       "Authentication is ready, but this environment is missing provider credentials.",
     noGuarantee:
-      "AwsarSetu helps you narrow possibilities. It does not guarantee eligibility, selection, benefit approval, or appointment.",
+      "Match labels are guidance only. Final eligibility, selection and approval always rest with the official source.",
   },
   hi: {
     appName: "AwsarSetu",

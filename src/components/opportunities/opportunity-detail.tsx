@@ -57,7 +57,7 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
 
   return (
     <div className="space-y-7">
-      <section className="grid overflow-hidden rounded-[2rem] border border-border bg-white shadow-card lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="surface-glass grid overflow-hidden rounded-[2rem] lg:grid-cols-[1.05fr_0.95fr]">
         <div className="p-6 md:p-9">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-mint px-3 py-1 text-xs font-black text-teal-dark">
@@ -68,7 +68,7 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
             </span>
             <span className="rounded-full bg-saffron/20 px-3 py-1 text-xs font-black text-ink">
               {opportunity.verificationStatus === "development-sample"
-                ? "Development sample"
+                ? "Sample record"
                 : t("officialSource")}
             </span>
           </div>
@@ -131,12 +131,12 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
           />
         </div>
 
-        <aside className="h-fit space-y-4 rounded-[1.5rem] border border-border bg-white p-5 shadow-soft lg:sticky lg:top-24">
+        <aside className="surface-glass h-fit space-y-4 rounded-[1.5rem] p-5 lg:sticky lg:top-24">
           <a
             href={opportunity.officialUrl}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 rounded-2xl bg-ink px-5 py-4 text-sm font-black text-white transition hover:bg-teal-dark"
+            className="magnetic-search flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-ink via-peacock to-teal-dark px-5 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:shadow-glow"
           >
             {opportunity.officialActionLabel || t("continueOfficial")}
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
@@ -219,7 +219,7 @@ function DetailBlock({
   icon?: React.ReactElement;
 }) {
   return (
-    <section className="rounded-[1.5rem] border border-border bg-white p-6 shadow-soft">
+    <section className="interactive-card rounded-[1.5rem] border border-white/80 bg-white/82 p-6 shadow-soft backdrop-blur">
       <div className="flex items-center gap-3">
         {icon && (
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-mint text-teal-dark [&>svg]:h-5 [&>svg]:w-5">

@@ -27,31 +27,32 @@ export function SavedPage() {
     .filter((item) => item.opportunity);
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[2rem] border border-border bg-white p-6 shadow-soft md:p-8">
+    <div className="space-y-8">
+      <section className="surface-glass relative overflow-hidden rounded-[2rem] p-6 md:p-8">
+        <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-mint/70 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-36 w-36 rounded-full bg-coral/15 blur-3xl" />
         <p className="text-sm font-black uppercase tracking-[0.16em] text-teal">
           Saved and tracking
         </p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-ink md:text-5xl">
+        <h1 className="relative mt-3 text-3xl font-black tracking-tight text-ink md:text-5xl">
           Keep your next steps simple.
         </h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-slate">
-          Guests can save locally on this device. Signed-in users can sync
-          saved opportunities, notes, status and reminders securely across
-          devices after Supabase is configured.
+        <p className="relative mt-4 max-w-3xl text-base leading-7 text-slate">
+          Save the opportunities worth returning to, add personal notes, and
+          move each one through a simple four-step tracker.
         </p>
       </section>
 
       {!savedOpportunities.length ? (
-        <div className="rounded-[1.5rem] border border-dashed border-border bg-white p-8 text-center shadow-soft">
+        <div className="surface-glass rounded-[1.5rem] border-dashed p-8 text-center">
           <p className="text-2xl font-black text-ink">No saved opportunities yet</p>
           <p className="mt-3 text-slate">
-            Browse Explore or Vacancies and save opportunities you want to
-            revisit.
+            Explore scholarships, vacancies, schemes and training paths, then
+            save the ones you want to revisit.
           </p>
           <Link
             href="/explore"
-            className="mt-5 inline-flex rounded-2xl bg-ink px-5 py-3 text-sm font-black text-white"
+            className="mt-5 inline-flex rounded-2xl bg-gradient-to-r from-ink to-peacock px-5 py-3 text-sm font-black text-white shadow-glow"
           >
             Explore opportunities
           </Link>
@@ -63,10 +64,10 @@ export function SavedPage() {
             return (
               <div
                 key={opportunity.id}
-                className="rounded-[1.5rem] border border-border bg-white p-4 shadow-soft"
+                className="surface-glass rounded-[1.5rem] p-4"
               >
                 <OpportunityCard opportunity={opportunity} compact />
-                <div className="mt-4 grid gap-4 rounded-[1.15rem] bg-canvas p-4">
+                <div className="mt-4 grid gap-4 rounded-[1.15rem] border border-white/80 bg-white/70 p-4 shadow-soft">
                   <div className="flex flex-wrap gap-2">
                     {statuses.map((status) => {
                       const Icon = status.icon;
@@ -80,8 +81,8 @@ export function SavedPage() {
                           }
                           className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-black ${
                             active
-                              ? "bg-ink text-white"
-                              : "bg-white text-slate hover:text-ink"
+                              ? "bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
+                              : "bg-white/86 text-slate shadow-soft hover:text-ink"
                           }`}
                         >
                           <Icon className="h-4 w-4" aria-hidden="true" />
@@ -99,7 +100,7 @@ export function SavedPage() {
                           notes: event.target.value,
                         })
                       }
-                      className="min-h-24 rounded-2xl border border-border bg-white px-4 py-3 text-ink outline-none focus:border-teal"
+                      className="min-h-24 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
                       placeholder="Add documents to collect, questions to check, or application status."
                     />
                   </label>
@@ -113,13 +114,13 @@ export function SavedPage() {
                           reminderDate: event.target.value,
                         })
                       }
-                      className="rounded-2xl border border-border bg-white px-4 py-3 text-ink outline-none focus:border-teal"
+                      className="rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
                     />
                   </label>
                   <button
                     type="button"
                     onClick={() => void toggleSaved(opportunity.id)}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-white px-4 py-3 text-sm font-black text-slate hover:text-coral"
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-sm font-black text-slate shadow-soft hover:text-coral"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                     Remove from saved

@@ -10,13 +10,14 @@ export function SectionHeading({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+    <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <h2 className="text-2xl font-black tracking-tight text-ink md:text-3xl">
+        <div className="mb-3 h-1.5 w-16 rounded-full bg-gradient-to-r from-coral via-saffron to-teal" />
+        <h2 className="text-3xl font-black tracking-tight text-ink md:text-4xl">
           {title}
         </h2>
         {description && (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate md:text-base">
+          <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-slate md:text-base">
             {description}
           </p>
         )}

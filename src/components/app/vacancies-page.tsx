@@ -42,7 +42,9 @@ export function VacanciesPage() {
 
   return (
     <div className="space-y-7">
-      <section className="rounded-[2rem] border border-border bg-ink p-6 text-white shadow-card md:p-8">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-gradient-to-br from-ink via-[#073a75] to-teal-dark p-6 text-white shadow-card md:p-8">
+        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-saffron/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-40 w-40 rounded-full bg-teal/30 blur-3xl" />
         <div className="grid gap-6 lg:grid-cols-[1fr_22rem] lg:items-center">
           <div>
             <div className="mb-5 inline-grid h-14 w-14 place-items-center rounded-2xl bg-white/12 text-mint">
@@ -58,7 +60,7 @@ export function VacanciesPage() {
               likely-match language.
             </p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/15 bg-white/10 p-5">
+          <div className="relative rounded-[1.5rem] border border-white/20 bg-white/12 p-5 shadow-glow backdrop-blur">
             <p className="text-sm font-bold text-mint">Quiet alert example</p>
             <p className="mt-3 text-xl font-black leading-snug">
               New match: A vacancy in Odisha may fit your education profile.
@@ -78,8 +80,8 @@ export function VacanciesPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm font-black transition ${
               activeTab === tab.id
-                ? "border-ink bg-ink text-white"
-                : "border-border bg-white text-slate hover:border-teal"
+                ? "border-ink bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
+                : "border-white/80 bg-white/76 text-slate shadow-soft backdrop-blur hover:border-teal"
             }`}
           >
             {tab.label}
@@ -103,7 +105,7 @@ function VacancyCard({ opportunity }: { opportunity: Opportunity }) {
       : opportunity.scope.states.join(", ");
 
   return (
-    <div className="rounded-[1.5rem] border border-border bg-white p-4 shadow-soft">
+    <div className="surface-glass rounded-[1.5rem] p-4">
       <OpportunityCard opportunity={opportunity} profile={profile} compact />
       <dl className="mt-4 grid gap-3 rounded-[1.1rem] bg-canvas p-4 text-sm">
         <VacancyFact

@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #fff8ef;
-  --hero: #fff3df;
+  --canvas: #fff7ec;
+  --hero: #fff0d8;
   --surface: #ffffff;
-  --mist: #f1f5f2;
-  --ink: #082f49;
-  --slate: #526474;
-  --border: #e6ded2;
-  --teal: #0f9488;
-  --teal-dark: #0b6d65;
-  --saffron: #f5a524;
-  --coral: #f9735b;
-  --mint: #dff8ee;
+  --mist: #f3f7f3;
+  --ink: #071f4a;
+  --slate: #53657c;
+  --border: #eadfcd;
+  --teal: #0f9f91;
+  --teal-dark: #08736a;
+  --saffron: #f8a51a;
+  --coral: #f35f45;
+  --mint: #dff9ee;
+  --peacock: #0d66d0;
+  --violet: #6957d8;
 }
 
 @theme inline {
@@ -28,8 +30,11 @@
   --color-saffron: var(--saffron);
   --color-coral: var(--coral);
   --color-mint: var(--mint);
-  --shadow-soft: 0 12px 36px rgba(8, 47, 73, 0.08);
-  --shadow-card: 0 22px 60px rgba(8, 47, 73, 0.14);
+  --color-peacock: var(--peacock);
+  --color-violet: var(--violet);
+  --shadow-soft: 0 18px 50px rgba(7, 31, 74, 0.09);
+  --shadow-card: 0 28px 80px rgba(7, 31, 74, 0.17);
+  --shadow-glow: 0 18px 65px rgba(15, 159, 145, 0.28);
   --font-sans: "Noto Sans Variable", "Noto Sans Devanagari Variable", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "SFMono-Regular", "Cascadia Code", ui-monospace, monospace;
 }
@@ -39,7 +44,10 @@
 }
 
 body {
-  background: var(--canvas);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(248, 165, 26, 0.16), transparent 28rem),
+    radial-gradient(circle at 88% 16%, rgba(13, 102, 208, 0.11), transparent 30rem),
+    linear-gradient(180deg, #fffaf1 0%, var(--canvas) 45%, #fff2df 100%);
   color: var(--ink);
   font-family:
     "Noto Sans Variable",
@@ -48,6 +56,19 @@ body {
     system-ui,
     sans-serif;
   text-rendering: optimizeLegibility;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  pointer-events: none;
+  content: "";
+  background-image:
+    linear-gradient(rgba(7, 31, 74, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(7, 31, 74, 0.04) 1px, transparent 1px);
+  background-size: 68px 68px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 62%);
 }
 
 ::selection {
@@ -81,6 +102,250 @@ button {
   overflow: hidden;
 }
 
+.ambient-field,
+.cursor-spotlight {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.ambient-field {
+  z-index: -2;
+  overflow: hidden;
+}
+
+.ambient-orb {
+  position: absolute;
+  display: block;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 999px;
+  opacity: 0.42;
+  filter: blur(52px);
+  transform: translate3d(0, 0, 0);
+  animation: float-orb 18s ease-in-out infinite alternate;
+}
+
+.ambient-orb-one {
+  left: 5%;
+  top: 15%;
+  background: rgba(45, 212, 191, 0.24);
+}
+
+.ambient-orb-two {
+  right: -10%;
+  top: 26%;
+  background: rgba(248, 165, 26, 0.24);
+  animation-delay: -5s;
+}
+
+.ambient-orb-three {
+  bottom: -10%;
+  left: 38%;
+  background: rgba(105, 87, 216, 0.16);
+  animation-delay: -9s;
+}
+
+.cursor-spotlight {
+  display: none;
+  width: 32rem;
+  height: 32rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(15, 159, 145, 0.16), transparent 66%);
+  mix-blend-mode: multiply;
+  transition: transform 130ms ease-out;
+}
+
+.surface-glass {
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(255, 247, 236, 0.62));
+  box-shadow: 0 24px 70px rgba(7, 31, 74, 0.13);
+  backdrop-filter: blur(18px);
+}
+
+.atlas-hero {
+  isolation: isolate;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 241, 214, 0.74)),
+    radial-gradient(circle at 76% 20%, rgba(45, 212, 191, 0.22), transparent 21rem),
+    radial-gradient(circle at 38% 92%, rgba(248, 165, 26, 0.24), transparent 25rem);
+}
+
+.atlas-hero::before,
+.atlas-hero::after {
+  position: absolute;
+  inset: auto;
+  z-index: -1;
+  content: "";
+  border-radius: 999px;
+  filter: blur(24px);
+  opacity: 0.72;
+}
+
+.atlas-hero::before {
+  right: 14%;
+  top: 8%;
+  width: 9rem;
+  height: 9rem;
+  background: rgba(45, 212, 191, 0.34);
+  animation: breathe 6s ease-in-out infinite;
+}
+
+.atlas-hero::after {
+  bottom: 12%;
+  left: 44%;
+  width: 12rem;
+  height: 12rem;
+  background: rgba(248, 165, 26, 0.28);
+  animation: breathe 7s ease-in-out infinite reverse;
+}
+
+.magnetic-search {
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 22px 80px rgba(7, 31, 74, 0.16),
+    0 0 0 8px rgba(255, 255, 255, 0.52);
+}
+
+.magnetic-search::before {
+  position: absolute;
+  inset: -80% -30%;
+  content: "";
+  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.18), rgba(248, 165, 26, 0.24), transparent);
+  transform: translateX(-50%);
+  animation: shimmer 7s linear infinite;
+}
+
+.journey-line {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 23% 65%, rgba(105, 87, 216, 0.35) 0 4px, transparent 5px),
+    radial-gradient(circle at 41% 48%, rgba(15, 159, 145, 0.38) 0 5px, transparent 6px),
+    radial-gradient(circle at 67% 34%, rgba(248, 165, 26, 0.45) 0 5px, transparent 6px);
+}
+
+.interactive-card {
+  --rx: 0deg;
+  --ry: 0deg;
+  transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
+  transform-style: preserve-3d;
+  transition:
+    transform 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.interactive-card::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 30%), rgba(255, 255, 255, 0.78), transparent 34%);
+  transition: opacity 260ms ease;
+}
+
+.interactive-card:hover::after {
+  opacity: 1;
+}
+
+.interactive-card:hover {
+  box-shadow: 0 34px 90px rgba(7, 31, 74, 0.18);
+}
+
+.dock-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.dock-item::before {
+  position: absolute;
+  inset: -1px;
+  content: "";
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(45, 212, 191, 0.18), rgba(248, 165, 26, 0.2));
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.dock-item:hover::before {
+  opacity: 1;
+}
+
+.reveal-up {
+  animation: reveal-up 620ms both;
+}
+
+.delay-1 {
+  animation-delay: 120ms;
+}
+
+.delay-2 {
+  animation-delay: 240ms;
+}
+
+.pulse-dot {
+  box-shadow: 0 0 0 0 rgba(243, 95, 69, 0.42);
+  animation: pulse-ring 2.4s infinite;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cursor-spotlight {
+    display: block;
+  }
+}
+
+@keyframes float-orb {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(4rem, -3rem, 0) scale(1.12);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(55%);
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(243, 95, 69, 0.42);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgba(243, 95, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(243, 95, 69, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -89,5 +354,10 @@ button {
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .cursor-spotlight,
+  .ambient-field {
+    display: none;
   }
 }
