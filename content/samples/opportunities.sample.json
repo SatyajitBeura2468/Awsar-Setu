@@ -24,7 +24,7 @@
     "importantConditions": ["Officially listed condition"],
     "howToApply": ["Officially listed application step"],
     "lastChecked": "2026-06-22",
-    "verificationStatus": "development-sample",
+    "contentStatus": "development-sample",
     "sourceDomain": "scholarships.gov.in",
     "expired": false
   }

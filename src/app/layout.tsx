@@ -5,16 +5,29 @@ import "./globals.css";
 import { AppProviders } from "@/components/app/app-providers";
 import { AppShell } from "@/components/app/app-shell";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://awsarsetu.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://awsarsetu.app"),
+  metadataBase: new URL(appUrl),
   title: {
-    default: "AwsarSetu | Find opportunities made for your next step",
+    default: "AwsarSetu | Opportunity Atlas for India",
     template: "%s | AwsarSetu",
   },
   description:
-    "Scholarships, jobs, vacancies, schemes, training and support, all in one clear place.",
+    "Find scholarships, vacancies, schemes, training and support through a clear, source-first Opportunity Atlas.",
   manifest: "/manifest.webmanifest",
   applicationName: "AwsarSetu",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "AwsarSetu",
+    description:
+      "A citizen-first Opportunity Atlas for scholarships, vacancies, schemes, training and support across India.",
+    url: appUrl,
+    siteName: "AwsarSetu",
+    type: "website",
+  },
   appleWebApp: {
     capable: true,
     title: "AwsarSetu",

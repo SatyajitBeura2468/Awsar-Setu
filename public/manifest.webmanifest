@@ -1,12 +1,12 @@
 {
   "name": "AwsarSetu",
   "short_name": "AwsarSetu",
-  "description": "Find scholarships, jobs, vacancies, schemes, training and support in one clear place.",
+  "description": "A citizen-first Opportunity Atlas for scholarships, vacancies, schemes, training and support across India.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#FFF8EF",
-  "theme_color": "#FFF8EF",
+  "theme_color": "#071F4A",
   "orientation": "portrait-primary",
   "icons": [
     {

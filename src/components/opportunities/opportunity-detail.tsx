@@ -12,10 +12,15 @@ import {
   Share2,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import { useProfile } from "@/contexts/profile-context";
 import { useSaved } from "@/contexts/saved-context";
 import { benefitLabels, categoryLabels } from "@/lib/i18n";
 import { matchOpportunity } from "@/lib/matching";
-import type { Opportunity, UserProfile } from "@/lib/types";
+import type { Opportunity } from "@/lib/types";
+import {
+  SourceExitSheet,
+  TrustStatus,
+} from "@/components/experience/experience-primitives";
 
 const coverMap = {
   education: "/covers/education.svg",
@@ -28,19 +33,12 @@ const coverMap = {
   finance: "/covers/finance.svg",
 } as const;
 
-const profile: UserProfile = {
-  state: "Odisha",
-  age: 19,
-  educationLevel: "class-12",
-  currentRole: "student",
-  interests: ["education-scholarships", "government-jobs-vacancies"],
-};
-
 export function OpportunityDetail({ opportunity }: { opportunity: Opportunity }) {
   const { locale, t } = useLanguage();
+  const { profile, profileReady } = useProfile();
   const { isSaved, toggleSaved } = useSaved();
   const saved = isSaved(opportunity.id);
-  const match = matchOpportunity(profile, opportunity);
+  const match = matchOpportunity(profileReady ? profile : null, opportunity);
   const scope =
     opportunity.scope.kind === "national"
       ? "India-wide"
@@ -66,11 +64,7 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
             <span className="rounded-full bg-mist px-3 py-1 text-xs font-black text-slate">
               {benefitLabels[opportunity.benefitType][locale]}
             </span>
-            <span className="rounded-full bg-saffron/20 px-3 py-1 text-xs font-black text-ink">
-              {opportunity.verificationStatus === "development-sample"
-                ? "Sample record"
-                : t("officialSource")}
-            </span>
+            <TrustStatus status={opportunity.contentStatus} />
           </div>
           <h1 className="mt-5 text-3xl font-black leading-tight tracking-tight text-ink md:text-5xl">
             {opportunity.title}
@@ -113,6 +107,7 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
 
       <div className="grid gap-6 lg:grid-cols-[1fr_21rem]">
         <div className="space-y-6">
+          <ApplicationPathway opportunity={opportunity} />
           <DetailBlock title="What it offers" items={opportunity.whatItOffers} />
           <DetailBlock title="Who can apply" items={opportunity.whoCanApply} />
           <DetailBlock
@@ -132,15 +127,13 @@ export function OpportunityDetail({ opportunity }: { opportunity: Opportunity })
         </div>
 
         <aside className="surface-glass h-fit space-y-4 rounded-[1.5rem] p-5 lg:sticky lg:top-24">
-          <a
-            href={opportunity.officialUrl}
-            target="_blank"
-            rel="noreferrer"
+          <SourceExitSheet
+            opportunity={opportunity}
             className="magnetic-search flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-ink via-peacock to-teal-dark px-5 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:shadow-glow"
           >
             {opportunity.officialActionLabel || t("continueOfficial")}
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
-          </a>
+          </SourceExitSheet>
           <p className="text-center text-sm font-bold text-slate">
             {t("opensOfficial")}
           </p>
@@ -236,6 +229,47 @@ function DetailBlock({
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+function ApplicationPathway({ opportunity }: { opportunity: Opportunity }) {
+  const steps = [
+    {
+      title: "Read source status",
+      body:
+        opportunity.contentStatus === "verified-active"
+          ? "This record has notice-level review."
+          : "This is a directory path. Find the specific notice or scheme on the official source.",
+    },
+    {
+      title: "Check criteria",
+      body: "Confirm education, age band, state coverage, documents and fees on the official page.",
+    },
+    {
+      title: "Prepare safely",
+      body: "Save notes, collect only required documents and avoid unofficial payment or shortcut claims.",
+    },
+    {
+      title: "Continue to source",
+      body: "Use the source preflight before opening the official portal in a new tab.",
+    },
+  ];
+
+  return (
+    <section className="application-pathway">
+      <h2>Application pathway</h2>
+      <ol>
+        {steps.map((step, index) => (
+          <li key={step.title}>
+            <span>{index + 1}</span>
+            <div>
+              <strong>{step.title}</strong>
+              <p>{step.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

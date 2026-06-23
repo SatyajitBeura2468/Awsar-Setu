@@ -6,17 +6,21 @@ import {
   Bookmark,
   BriefcaseBusiness,
   Compass,
-  Globe2,
   Home,
-  MapPin,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useLanguage } from "@/contexts/language-context";
+import { useProfile } from "@/contexts/profile-context";
+import {
+  ProfilePulse,
+  RouteTransition,
+} from "@/components/experience/experience-primitives";
 import { Logo } from "@/components/ui/logo";
 import { LanguageSwitcher } from "./language-switcher";
 import { NotificationBell } from "./notification-bell";
+import { StateSelector } from "./state-selector";
 
 const navItems = [
   { href: "/", key: "home", icon: Home },
@@ -34,6 +38,7 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const { profileStrength } = useProfile();
 
   return (
     <div className="relative min-h-screen bg-transparent text-ink">
@@ -79,6 +84,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             </div>
           </div>
+          <div className="relative mt-4">
+            <ProfilePulse
+              strength={profileStrength}
+              label="Opportunity compass"
+            />
+          </div>
         </div>
       </aside>
 
@@ -92,24 +103,20 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
             </div>
             <div className="hidden items-center gap-3 md:flex">
-              <div className="flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-black text-ink shadow-soft">
-                <MapPin className="h-4 w-4 text-coral" aria-hidden="true" />
-                India
-              </div>
-              <div className="flex items-center gap-2 rounded-full border border-white/80 bg-white/60 px-4 py-2 text-sm font-bold text-slate shadow-soft">
-                <Globe2 className="h-4 w-4 text-teal" aria-hidden="true" />
-                Change state
-              </div>
+              <StateSelector />
             </div>
             <div className="ml-auto flex items-center gap-3">
               <LanguageSwitcher />
               <NotificationBell />
             </div>
           </div>
+          <div className="mt-3 md:hidden">
+            <StateSelector />
+          </div>
         </header>
 
         <main className="relative z-10 mx-auto max-w-[86rem] px-4 pb-28 pt-5 md:px-8 md:pb-12">
-          {children}
+          <RouteTransition>{children}</RouteTransition>
         </main>
       </div>
 

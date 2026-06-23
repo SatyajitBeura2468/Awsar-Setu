@@ -18,9 +18,11 @@ const schema = z.array(
     category: z.enum(categories),
     description: z.string().min(40),
     officialUrl: z.string().url(),
-    verificationStatus: z.enum([
-      "officially-reviewed",
-      "source-linked",
+    contentStatus: z.enum([
+      "verified-active",
+      "official-directory",
+      "archived",
+      "unavailable",
       "development-sample",
     ]),
     sourceDomain: z.string().min(4),

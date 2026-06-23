@@ -20,9 +20,9 @@ if (!Array.isArray(records)) {
   process.exit(1);
 }
 
-if (records.some((record) => record.verificationStatus === "development-sample")) {
+if (records.some((record) => record.contentStatus === "development-sample")) {
   console.error(
-    "Refusing to import development-sample records. Review official sources and mark records source-linked or officially-reviewed first.",
+    "Refusing to import development-sample records. Review official sources and mark records official-directory or verified-active first.",
   );
   process.exit(1);
 }
@@ -32,6 +32,12 @@ const supabase = createClient(url, serviceRoleKey, {
     persistSession: false,
   },
 });
+
+function legacyVerificationStatus(contentStatus) {
+  if (contentStatus === "verified-active") return "officially-reviewed";
+  if (contentStatus === "official-directory") return "source-linked";
+  return "development-sample";
+}
 
 const rows = records.map((record) => ({
   slug: record.slug,
@@ -60,7 +66,8 @@ const rows = records.map((record) => ({
   important_conditions: record.importantConditions,
   how_to_apply: record.howToApply,
   last_checked: record.lastChecked,
-  verification_status: record.verificationStatus,
+  verification_status: legacyVerificationStatus(record.contentStatus),
+  content_status: record.contentStatus,
   source_domain: record.sourceDomain,
   expired: record.expired,
 }));

@@ -11,6 +11,16 @@ export function isSupabaseConfigured() {
   return Boolean(env.supabaseUrl && env.supabaseAnonKey);
 }
 
+export function getClientConfigStatus() {
+  const env = getPublicEnv();
+  return {
+    supabase: Boolean(env.supabaseUrl && env.supabaseAnonKey),
+    browserNotifications: Boolean(
+      env.supabaseUrl && env.supabaseAnonKey && env.vapidPublicKey,
+    ),
+  };
+}
+
 export function requireServerEnv(name: string) {
   const value = process.env[name];
   if (!value) {

@@ -69,9 +69,11 @@ export const opportunityImportSchema = z.object({
   importantConditions: z.array(z.string().min(3)),
   howToApply: z.array(z.string().min(3)),
   lastChecked: z.string().date(),
-  verificationStatus: z.enum([
-    "officially-reviewed",
-    "source-linked",
+  contentStatus: z.enum([
+    "verified-active",
+    "official-directory",
+    "archived",
+    "unavailable",
     "development-sample",
   ]),
   sourceDomain: z.string().min(4),

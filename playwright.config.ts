@@ -2,8 +2,18 @@ import { defineConfig, devices } from "@playwright/test";
 
 const pnpmCommand =
   process.platform === "win32"
-    ? "C:\\Users\\subha\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\pnpm.cmd dev"
-    : "pnpm dev";
+    ? "node_modules\\.bin\\next.cmd dev -H 127.0.0.1 -p 3000"
+    : "pnpm dev -- -H 127.0.0.1 -p 3000";
+
+const webServer =
+  process.env.PLAYWRIGHT_SKIP_WEBSERVER === "1"
+    ? undefined
+    : {
+        command: pnpmCommand,
+        url: "http://127.0.0.1:3000",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      };
 
 export default defineConfig({
   testDir: "./tests",
@@ -12,12 +22,7 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",
   },
-  webServer: {
-    command: pnpmCommand,
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer,
   projects: [
     {
       name: "chromium",

@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Archive, ClipboardCheck, FilePenLine, Inbox, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ClipboardCheck,
+  FilePenLine,
+  Inbox,
+  Trash2,
+} from "lucide-react";
 import { useSaved } from "@/contexts/saved-context";
 import { opportunities } from "@/lib/opportunities";
 import type { ApplicationStatus } from "@/lib/types";
@@ -58,79 +64,115 @@ export function SavedPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2">
-          {savedOpportunities.map(({ opportunity, saved }) => {
-            if (!opportunity) return null;
-            return (
-              <div
-                key={opportunity.id}
-                className="surface-glass rounded-[1.5rem] p-4"
-              >
-                <OpportunityCard opportunity={opportunity} compact />
-                <div className="mt-4 grid gap-4 rounded-[1.15rem] border border-white/80 bg-white/70 p-4 shadow-soft">
-                  <div className="flex flex-wrap gap-2">
-                    {statuses.map((status) => {
-                      const Icon = status.icon;
-                      const active = saved.status === status.id;
-                      return (
-                        <button
-                          key={status.id}
-                          type="button"
-                          onClick={() =>
-                            updateSaved(opportunity.id, { status: status.id })
-                          }
-                          className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-black ${
-                            active
-                              ? "bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
-                              : "bg-white/86 text-slate shadow-soft hover:text-ink"
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" aria-hidden="true" />
-                          {status.label}
-                        </button>
-                      );
-                    })}
+        <>
+          <SavedJourney savedItems={savedItems} />
+          <div className="grid gap-5 lg:grid-cols-2">
+            {savedOpportunities.map(({ opportunity, saved }) => {
+              if (!opportunity) return null;
+              return (
+                <div
+                  key={opportunity.id}
+                  className="surface-glass rounded-[1.5rem] p-4"
+                >
+                  <OpportunityCard opportunity={opportunity} compact />
+                  <div className="mt-4 grid gap-4 rounded-[1.15rem] border border-white/80 bg-white/70 p-4 shadow-soft">
+                    <div className="flex flex-wrap gap-2">
+                      {statuses.map((status) => {
+                        const Icon = status.icon;
+                        const active = saved.status === status.id;
+                        return (
+                          <button
+                            key={status.id}
+                            type="button"
+                            onClick={() =>
+                              updateSaved(opportunity.id, {
+                                status: status.id,
+                              })
+                            }
+                            className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-black ${
+                              active
+                                ? "bg-gradient-to-r from-ink to-peacock text-white shadow-glow"
+                                : "bg-white/86 text-slate shadow-soft hover:text-ink"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" aria-hidden="true" />
+                            {status.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <label className="grid gap-2 text-sm font-bold text-slate">
+                      Private notes
+                      <textarea
+                        value={saved.notes}
+                        onChange={(event) =>
+                          updateSaved(opportunity.id, {
+                            notes: event.target.value,
+                          })
+                        }
+                        className="min-h-24 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
+                        placeholder="Add documents to collect, questions to check, or application status."
+                      />
+                    </label>
+                    <label className="grid gap-2 text-sm font-bold text-slate">
+                      Reminder date
+                      <input
+                        type="date"
+                        value={saved.reminderDate ?? ""}
+                        onChange={(event) =>
+                          updateSaved(opportunity.id, {
+                            reminderDate: event.target.value,
+                          })
+                        }
+                        className="rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => void toggleSaved(opportunity.id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-sm font-black text-slate shadow-soft hover:text-coral"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      Remove from saved
+                    </button>
                   </div>
-                  <label className="grid gap-2 text-sm font-bold text-slate">
-                    Private notes
-                    <textarea
-                      value={saved.notes}
-                      onChange={(event) =>
-                        updateSaved(opportunity.id, {
-                          notes: event.target.value,
-                        })
-                      }
-                      className="min-h-24 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
-                      placeholder="Add documents to collect, questions to check, or application status."
-                    />
-                  </label>
-                  <label className="grid gap-2 text-sm font-bold text-slate">
-                    Reminder date
-                    <input
-                      type="date"
-                      value={saved.reminderDate ?? ""}
-                      onChange={(event) =>
-                        updateSaved(opportunity.id, {
-                          reminderDate: event.target.value,
-                        })
-                      }
-                      className="rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-ink shadow-soft outline-none focus:border-teal"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => void toggleSaved(opportunity.id)}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-sm font-black text-slate shadow-soft hover:text-coral"
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    Remove from saved
-                  </button>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
+  );
+}
+
+function SavedJourney({ savedItems }: { savedItems: Array<{ status: ApplicationStatus }> }) {
+  const counts = statuses.map((status) => ({
+    ...status,
+    count: savedItems.filter((item) => item.status === status.id).length,
+  }));
+
+  return (
+    <section className="journey-board" aria-label="Saved opportunity progress">
+      <div>
+        <p>Journey board</p>
+        <h2>Your saved paths at a glance</h2>
+      </div>
+      <div className="journey-rail">
+        {counts.map((status, index) => {
+          const Icon = status.icon;
+          return (
+            <div key={status.id} className="journey-node">
+              {index < counts.length - 1 && <span aria-hidden="true" />}
+              <b>
+                <Icon className="h-4 w-4" aria-hidden="true" />
+              </b>
+              <strong>{status.count}</strong>
+              <em>{status.label}</em>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

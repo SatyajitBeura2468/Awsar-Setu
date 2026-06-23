@@ -1,106 +1,155 @@
 "use client";
 
-import { useState } from "react";
-import { BellRing, UserRoundCog } from "lucide-react";
+import { BellRing, ShieldCheck, UserRoundCog } from "lucide-react";
+import type { ReactNode } from "react";
 import { AuthPanel } from "@/components/auth/auth-panel";
+import { ProfilePulse } from "@/components/experience/experience-primitives";
+import { useLanguage } from "@/contexts/language-context";
+import { useProfile } from "@/contexts/profile-context";
 import { categoryLabels, educationLabels, roleLabels } from "@/lib/i18n";
+import { getPublicEnv, isSupabaseConfigured } from "@/lib/env";
 import {
+  ageBands,
   categories,
   currentRoles,
   educationLevels,
   indianStates,
+  type AgeBand,
   type Category,
+  type CurrentRole,
+  type EducationLevel,
+  type IndianState,
 } from "@/lib/types";
-import { useLanguage } from "@/contexts/language-context";
+
+const ageBandLabels: Record<AgeBand, string> = {
+  "under-18": "Under 18",
+  "18-24": "18-24",
+  "25-34": "25-34",
+  "35-44": "35-44",
+  "45-59": "45-59",
+  "60-plus": "60+",
+  "not-specified": "Prefer not to say",
+};
 
 export function AccountPage() {
   const { locale, t } = useLanguage();
-  const [interests, setInterests] = useState<Category[]>([
-    "education-scholarships",
-    "government-jobs-vacancies",
-  ]);
+  const {
+    profile,
+    profileStrength,
+    notificationPreferences,
+    updateProfile,
+    updateNotificationPreferences,
+  } = useProfile();
+  const env = getPublicEnv();
+  const notificationsConfigured = Boolean(
+    env.vapidPublicKey && isSupabaseConfigured(),
+  );
 
   const toggleInterest = (category: Category) => {
-    setInterests((items) =>
-      items.includes(category)
-        ? items.filter((item) => item !== category)
-        : [...items, category],
-    );
+    updateProfile({
+      interests: profile.interests.includes(category)
+        ? profile.interests.filter((item) => item !== category)
+        : [...profile.interests, category],
+    });
   };
 
   return (
     <div className="space-y-8">
-      <section className="surface-glass relative overflow-hidden rounded-[2rem] p-6 md:p-8">
-        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 h-32 w-32 rounded-full bg-saffron/20 blur-3xl" />
-        <p className="text-sm font-black uppercase tracking-[0.16em] text-teal">
-          {t("account")}
-        </p>
-        <h1 className="relative mt-3 max-w-3xl text-3xl font-black tracking-tight text-ink md:text-5xl">
-          {t("accountBenefit")}
-        </h1>
-        <p className="relative mt-4 max-w-3xl text-base leading-7 text-slate">
-          Sign in only when you want synced saves, profile-shaped matches and
-          quiet reminders. Searching and opening official sources stays open to
-          everyone.
-        </p>
+      <section className="account-hero">
+        <div>
+          <p>{t("account")}</p>
+          <h1>{t("accountBenefit")}</h1>
+          <span>
+            Your profile is optional, local-first for guests, and used only to
+            make match labels less generic.
+          </span>
+        </div>
+        <ProfilePulse strength={profileStrength} label="Profile strength" />
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <AuthPanel />
 
-        <section className="surface-glass rounded-[1.5rem] p-5 md:p-6">
+        <section className="compass-panel">
           <div className="flex items-start gap-4">
             <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-mint to-white text-teal-dark shadow-soft">
               <UserRoundCog className="h-6 w-6" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-2xl font-black text-ink">
-                Lightweight profile
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate">
-                Used only to improve matches. AwsarSetu does not request
-                Aadhaar, bank details, caste certificate details, disability
-                records, detailed medical data or exact date of birth.
+              <h2>Opportunity Compass</h2>
+              <p>
+                Add only what improves matching: state, age band, education,
+                role and interests. Optional fields stay optional.
               </p>
             </div>
           </div>
 
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <ProfileSelect label="State">
+            <ProfileSelect
+              label="State"
+              value={profile.state ?? ""}
+              onChange={(value) =>
+                updateProfile({
+                  state: value ? (value as IndianState) : undefined,
+                })
+              }
+            >
+              <option value="">Choose state</option>
               {indianStates.map((state) => (
-                <option key={state}>{state}</option>
+                <option key={state} value={state}>
+                  {state}
+                </option>
               ))}
             </ProfileSelect>
-            <ProfileSelect label="Age">
-              <option>19</option>
-              <option>18-24</option>
-              <option>25-34</option>
-              <option>35-44</option>
-              <option>45+</option>
+            <ProfileSelect
+              label="Age band"
+              value={profile.ageBand ?? ""}
+              onChange={(value) =>
+                updateProfile({
+                  ageBand: value ? (value as AgeBand) : undefined,
+                })
+              }
+            >
+              <option value="">Choose age band</option>
+              {ageBands.map((ageBand) => (
+                <option key={ageBand} value={ageBand}>
+                  {ageBandLabels[ageBand]}
+                </option>
+              ))}
             </ProfileSelect>
-            <ProfileSelect label="Education level">
+            <ProfileSelect
+              label="Education level"
+              value={profile.educationLevel ?? ""}
+              onChange={(value) =>
+                updateProfile({
+                  educationLevel: value
+                    ? (value as EducationLevel)
+                    : undefined,
+                })
+              }
+            >
+              <option value="">Choose education</option>
               {educationLevels.map((level) => (
-                <option key={level}>{educationLabels[level][locale]}</option>
+                <option key={level} value={level}>
+                  {educationLabels[level][locale]}
+                </option>
               ))}
             </ProfileSelect>
-            <ProfileSelect label="Current role">
+            <ProfileSelect
+              label="Current role"
+              value={profile.currentRole ?? ""}
+              onChange={(value) =>
+                updateProfile({
+                  currentRole: value ? (value as CurrentRole) : undefined,
+                })
+              }
+            >
+              <option value="">Choose role</option>
               {currentRoles.map((role) => (
-                <option key={role}>{roleLabels[role][locale]}</option>
+                <option key={role} value={role}>
+                  {roleLabels[role][locale]}
+                </option>
               ))}
-            </ProfileSelect>
-            <ProfileSelect label="Gender (optional)">
-              <option>Prefer not to say</option>
-              <option>Female</option>
-              <option>Male</option>
-              <option>Other</option>
-            </ProfileSelect>
-            <ProfileSelect label="Income range (optional)">
-              <option>Prefer not to say</option>
-              <option>Below 1 lakh</option>
-              <option>1-3 lakh</option>
-              <option>3-6 lakh</option>
-              <option>6-12 lakh</option>
             </ProfileSelect>
           </div>
 
@@ -114,51 +163,79 @@ export function AccountPage() {
                   key={category}
                   type="button"
                   onClick={() => toggleInterest(category)}
-                  className={`rounded-full border px-4 py-2 text-sm font-bold ${
-                    interests.includes(category)
-                      ? "border-teal bg-mint text-teal-dark shadow-soft"
-                      : "border-white/80 bg-white/72 text-slate hover:border-teal"
-                  }`}
+                  className={
+                    profile.interests.includes(category)
+                      ? "profile-chip is-selected"
+                      : "profile-chip"
+                  }
                 >
                   {categoryLabels[category][locale]}
                 </button>
               ))}
             </div>
           </div>
+
+          <div className="mt-5 rounded-2xl border border-teal/20 bg-mint/60 p-4 text-sm leading-6 text-ink">
+            <ShieldCheck className="mb-2 h-5 w-5 text-teal" aria-hidden="true" />
+            AwsarSetu does not ask for Aadhaar, exact date of birth, bank
+            details, caste certificate details, disability records, detailed
+            medical data or sensitive documents.
+          </div>
         </section>
       </div>
 
-      <section className="surface-glass rounded-[1.5rem] p-5 md:p-6">
+      <section className="compass-panel">
         <div className="flex items-start gap-4">
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-saffron/30 to-white text-coral shadow-soft">
             <BellRing className="h-6 w-6" aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-2xl font-black text-ink">
-              Notification preferences
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate">
-              Quiet by default: browser notifications for likely matches,
-              vacancy matches and deadline reminders; email only for meaningful
-              matches or important deadlines.
+            <h2>Notification preferences</h2>
+            <p>
+              {notificationsConfigured
+                ? "Notifications can be enabled after permission and subscription storage succeed."
+                : "Notifications are not configured yet. Add VAPID and Supabase credentials before enabling browser alerts."}
             </p>
           </div>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
+          <PreferenceToggle
+            label="Browser notifications"
+            disabled={!notificationsConfigured}
+            checked={
+              notificationsConfigured && notificationPreferences.browserEnabled
+            }
+            onChange={(checked) =>
+              updateNotificationPreferences({ browserEnabled: checked })
+            }
+          />
+          <PreferenceToggle
+            label="Email alerts"
+            checked={notificationPreferences.emailEnabled}
+            onChange={(checked) =>
+              updateNotificationPreferences({ emailEnabled: checked })
+            }
+          />
           {[
-            "Browser notifications",
-            "Email alerts",
-            "Preferred categories",
-            "State preference",
-            "Weekly alert frequency",
-          ].map((item) => (
-            <label
-              key={item}
-              className="dock-item flex items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/72 p-4 text-sm font-bold text-ink shadow-soft transition hover:-translate-y-0.5"
-            >
-              {item}
-              <input type="checkbox" className="h-5 w-5 accent-teal" />
-            </label>
+            ["likelyMatch", "Likely match"],
+            ["verifiedVacancy", "Verified vacancy"],
+            ["approachingDeadline", "Approaching deadline"],
+            ["savedItemReminder", "Saved-item reminder"],
+          ].map(([key, label]) => (
+            <PreferenceToggle
+              key={key}
+              label={label}
+              checked={
+                notificationPreferences.categories[
+                  key as keyof typeof notificationPreferences.categories
+                ]
+              }
+              onChange={(checked) =>
+                updateNotificationPreferences({
+                  categories: { [key]: checked },
+                })
+              }
+            />
           ))}
         </div>
       </section>
@@ -168,19 +245,55 @@ export function AccountPage() {
 
 function ProfileSelect({
   label,
+  value,
+  onChange,
   children,
 }: {
   label: string;
-  children: React.ReactNode;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
 }) {
   return (
     <label className="grid gap-2">
       <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
         {label}
       </span>
-      <select className="rounded-2xl border border-white/80 bg-white/78 px-4 py-3 text-sm font-bold text-ink shadow-soft outline-none transition focus:border-teal focus:bg-white">
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-2xl border border-white/80 bg-white/78 px-4 py-3 text-sm font-bold text-ink shadow-soft outline-none transition focus:border-teal focus:bg-white"
+      >
         {children}
       </select>
+    </label>
+  );
+}
+
+function PreferenceToggle({
+  label,
+  checked,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <label className="dock-item flex items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/72 p-4 text-sm font-bold text-ink shadow-soft transition hover:-translate-y-0.5">
+      <span>
+        {label}
+        {disabled && <small> Not configured</small>}
+      </span>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(event) => onChange(event.target.checked)}
+        className="h-5 w-5 accent-teal disabled:opacity-40"
+      />
     </label>
   );
 }

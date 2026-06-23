@@ -62,6 +62,18 @@ export const incomeRanges = [
 
 export type IncomeRange = (typeof incomeRanges)[number];
 
+export const ageBands = [
+  "under-18",
+  "18-24",
+  "25-34",
+  "35-44",
+  "45-59",
+  "60-plus",
+  "not-specified",
+] as const;
+
+export type AgeBand = (typeof ageBands)[number];
+
 export const indianStates = [
   "Andaman and Nicobar Islands",
   "Andhra Pradesh",
@@ -108,9 +120,13 @@ export type OpportunityScope =
   | { kind: "state"; states: IndianState[] };
 
 export type VerificationStatus =
-  | "officially-reviewed"
-  | "source-linked"
+  | "verified-active"
+  | "official-directory"
+  | "archived"
+  | "unavailable"
   | "development-sample";
+
+export type ContentStatus = VerificationStatus;
 
 export type MatchLevel = "likely" | "possible" | "check";
 
@@ -166,7 +182,7 @@ export interface Opportunity {
   importantConditions: string[];
   howToApply: string[];
   lastChecked: string;
-  verificationStatus: VerificationStatus;
+  contentStatus: ContentStatus;
   sourceDomain: string;
   createdAt: string;
   updatedAt: string;
@@ -183,12 +199,26 @@ export interface Opportunity {
 
 export interface UserProfile {
   state?: IndianState;
-  age?: number;
+  ageBand?: AgeBand;
   educationLevel?: EducationLevel;
   currentRole?: CurrentRole;
   interests: Category[];
   gender?: Gender;
   incomeRange?: IncomeRange;
+}
+
+export interface NotificationPreferences {
+  browserEnabled: boolean;
+  emailEnabled: boolean;
+  preferredCategories: Category[];
+  statePreference?: IndianState;
+  alertFrequency: "rare" | "weekly" | "deadline-only";
+  categories: {
+    likelyMatch: boolean;
+    verifiedVacancy: boolean;
+    approachingDeadline: boolean;
+    savedItemReminder: boolean;
+  };
 }
 
 export interface SavedOpportunity {

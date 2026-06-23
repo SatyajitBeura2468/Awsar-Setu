@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { BriefcaseBusiness, GraduationCap, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
+import { useProfile } from "@/contexts/profile-context";
 import { getVacancies } from "@/lib/opportunities";
-import type { Opportunity, UserProfile } from "@/lib/types";
+import type { Opportunity } from "@/lib/types";
 import { OpportunityCard } from "@/components/opportunities/opportunity-card";
+import { EmptyState } from "./empty-state";
 
 type VacancyTab =
   | "all"
@@ -24,16 +26,9 @@ const tabs: Array<{ id: VacancyTab; label: string }> = [
   { id: "contractual-local", label: "Contractual and Local Recruitment" },
 ];
 
-const profile: UserProfile = {
-  state: "Odisha",
-  age: 19,
-  educationLevel: "class-12",
-  currentRole: "student",
-  interests: ["government-jobs-vacancies", "jobs-internships-apprenticeships"],
-};
-
 export function VacanciesPage() {
   const { t } = useLanguage();
+  const { profile, profileReady } = useProfile();
   const [activeTab, setActiveTab] = useState<VacancyTab>("all");
   const vacancies = getVacancies().filter(
     (opportunity) =>
@@ -61,12 +56,13 @@ export function VacanciesPage() {
             </p>
           </div>
           <div className="relative rounded-[1.5rem] border border-white/20 bg-white/12 p-5 shadow-glow backdrop-blur">
-            <p className="text-sm font-bold text-mint">Quiet alert example</p>
+            <p className="text-sm font-bold text-mint">Alert readiness</p>
             <p className="mt-3 text-xl font-black leading-snug">
-              New match: A vacancy in Odisha may fit your education profile.
+              Vacancy alerts stay off until notifications are configured.
             </p>
             <p className="mt-3 text-sm leading-6 text-blue-100">
-              Notifications never imply guaranteed eligibility.
+              When enabled, alerts use cautious language and never imply
+              guaranteed eligibility.
             </p>
           </div>
         </div>
@@ -89,16 +85,38 @@ export function VacanciesPage() {
         ))}
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        {vacancies.map((opportunity) => (
-          <VacancyCard key={opportunity.id} opportunity={opportunity} />
-        ))}
-      </div>
+      {vacancies.length ? (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {vacancies.map((opportunity, index) => (
+            <VacancyCard
+              key={opportunity.id}
+              opportunity={opportunity}
+              profile={profileReady ? profile : null}
+              priority={index === 0}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="No records in this vacancy lane yet"
+          description="AwsarSetu will show verified vacancy notices only after official-source review. Try all vacancies or official directories."
+          actionHref="/vacancies"
+          actionLabel="Show all vacancies"
+        />
+      )}
     </div>
   );
 }
 
-function VacancyCard({ opportunity }: { opportunity: Opportunity }) {
+function VacancyCard({
+  opportunity,
+  profile,
+  priority,
+}: {
+  opportunity: Opportunity;
+  profile: Parameters<typeof OpportunityCard>[0]["profile"];
+  priority?: boolean;
+}) {
   const scope =
     opportunity.scope.kind === "national"
       ? "India-wide"
@@ -106,7 +124,12 @@ function VacancyCard({ opportunity }: { opportunity: Opportunity }) {
 
   return (
     <div className="surface-glass rounded-[1.5rem] p-4">
-      <OpportunityCard opportunity={opportunity} profile={profile} compact />
+      <OpportunityCard
+        opportunity={opportunity}
+        profile={profile}
+        compact
+        priority={priority}
+      />
       <dl className="mt-4 grid gap-3 rounded-[1.1rem] bg-canvas p-4 text-sm">
         <VacancyFact
           label="Recruiting authority"

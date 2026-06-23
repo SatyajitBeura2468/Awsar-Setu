@@ -9,6 +9,10 @@ import { useSaved } from "@/contexts/saved-context";
 import { benefitLabels, categoryLabels } from "@/lib/i18n";
 import { matchOpportunity } from "@/lib/matching";
 import type { Opportunity, UserProfile } from "@/lib/types";
+import {
+  SourceExitSheet,
+  TrustStatus,
+} from "@/components/experience/experience-primitives";
 
 const coverMap = {
   education: "/covers/education.svg",
@@ -21,7 +25,8 @@ const coverMap = {
   finance: "/covers/finance.svg",
 } as const;
 
-function formatDeadline(deadline: string | null) {
+function formatDeadline(deadline: string | null, status: Opportunity["contentStatus"]) {
+  if (status === "official-directory") return "Directory: check source";
   if (!deadline) return "Check official portal";
   return new Intl.DateTimeFormat("en-IN", {
     day: "numeric",
@@ -68,7 +73,7 @@ export function OpportunityCard({
         event.currentTarget.style.setProperty("--rx", "0deg");
         event.currentTarget.style.setProperty("--ry", "0deg");
       }}
-      className="interactive-card group relative overflow-hidden rounded-[1.55rem] border border-white/78 bg-white/86 shadow-soft backdrop-blur"
+      className="interactive-card opportunity-capsule group relative overflow-hidden rounded-[1.55rem] border border-white/78 bg-white/86 shadow-soft backdrop-blur"
     >
       <Link href={`/opportunities/${opportunity.slug}`} className="block">
         <div className="relative aspect-[16/9] overflow-hidden bg-mist">
@@ -84,11 +89,9 @@ export function OpportunityCard({
           <div className="absolute left-3 top-3 max-w-[80%] rounded-full bg-white/92 px-3 py-1 text-xs font-black text-ink shadow-soft backdrop-blur">
             {categoryLabels[opportunity.category][locale]}
           </div>
-          {opportunity.verificationStatus === "development-sample" && (
-            <div className="absolute bottom-3 left-3 rounded-full bg-saffron/95 px-3 py-1 text-xs font-black text-ink shadow-soft backdrop-blur">
-              Sample record
-            </div>
-          )}
+          <div className="absolute bottom-3 left-3">
+            <TrustStatus status={opportunity.contentStatus} compact />
+          </div>
         </div>
       </Link>
 
@@ -132,7 +135,7 @@ export function OpportunityCard({
           </div>
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-coral" aria-hidden="true" />
-            <span>{formatDeadline(opportunity.deadline)}</span>
+            <span>{formatDeadline(opportunity.deadline, opportunity.contentStatus)}</span>
           </div>
         </div>
 
@@ -153,15 +156,18 @@ export function OpportunityCard({
           </span>
         </div>
 
-        <a
-          href={opportunity.officialUrl}
-          target="_blank"
-          rel="noreferrer"
+        <div className="rounded-2xl bg-mint/60 px-3 py-2 text-xs font-bold leading-5 text-ink">
+          <span className="font-black">Why this may fit: </span>
+          {match.reasons[0] ?? "Open the official source to check criteria."}
+        </div>
+
+        <SourceExitSheet
+          opportunity={opportunity}
           className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-ink to-peacock px-4 py-2 text-sm font-black text-white shadow-soft transition hover:-translate-y-0.5 hover:shadow-glow"
         >
           {opportunity.officialActionLabel}
           <ExternalLink className="h-4 w-4" aria-hidden="true" />
-        </a>
+        </SourceExitSheet>
       </div>
     </article>
   );

@@ -5,7 +5,7 @@ import type { UserProfile } from "./types";
 
 const odishaStudent: UserProfile = {
   state: "Odisha",
-  age: 19,
+  ageBand: "18-24",
   educationLevel: "class-12",
   currentRole: "student",
   interests: ["education-scholarships", "government-jobs-vacancies"],

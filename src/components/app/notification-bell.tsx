@@ -2,10 +2,19 @@
 
 import { Bell } from "lucide-react";
 import { useState } from "react";
+import { useProfile } from "@/contexts/profile-context";
 import { getPublicEnv } from "@/lib/env";
+
+function urlBase64ToUint8Array(value: string) {
+  const padding = "=".repeat((4 - (value.length % 4)) % 4);
+  const base64 = (value + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
 
 export function NotificationBell() {
   const [message, setMessage] = useState<string | null>(null);
+  const { updateNotificationPreferences } = useProfile();
 
   const requestPermission = async () => {
     if (!("Notification" in window) || !("serviceWorker" in navigator)) {
@@ -15,7 +24,7 @@ export function NotificationBell() {
 
     const env = getPublicEnv();
     if (!env.vapidPublicKey) {
-      setMessage("Add VAPID keys to enable browser alerts.");
+      setMessage("Notifications are not configured yet. Add VAPID keys first.");
       return;
     }
 
@@ -25,7 +34,33 @@ export function NotificationBell() {
       return;
     }
 
-    setMessage("Notifications are ready for meaningful matches and deadlines.");
+    const registration = await navigator.serviceWorker.ready;
+    const subscription =
+      (await registration.pushManager.getSubscription()) ??
+      (await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(env.vapidPublicKey),
+      }));
+
+    const response = await fetch("/api/notifications/subscribe", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(subscription),
+    });
+    const result = (await response.json().catch(() => null)) as
+      | { ok: boolean; error?: string }
+      | null;
+
+    if (!response.ok || !result?.ok) {
+      setMessage(
+        result?.error ??
+          "Notification permission was granted, but the subscription was not stored.",
+      );
+      return;
+    }
+
+    updateNotificationPreferences({ browserEnabled: true });
+    setMessage("Notifications are configured for quiet, meaningful alerts.");
   };
 
   return (

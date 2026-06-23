@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
@@ -83,6 +84,34 @@ function writeSavedItems(items: SavedOpportunity[]) {
   window.dispatchEvent(new Event(savedChangeEvent));
 }
 
+async function upsertSavedItem(item: SavedOpportunity) {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return;
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) return;
+
+  await supabase.from("saved_opportunities").upsert(
+    {
+      user_id: session.user.id,
+      opportunity_id: item.opportunityId,
+      status: item.status,
+      notes: item.notes,
+      reminder_date: item.reminderDate ?? null,
+    },
+    { onConflict: "user_id,opportunity_id" },
+  );
+}
+
+async function migrateLocalSavedItems() {
+  const items = getSavedSnapshot();
+  if (!items.length) return;
+  await Promise.all(items.map((item) => upsertSavedItem(item)));
+}
+
 export function SavedProvider({ children }: { children: ReactNode }) {
   const savedItems = useSyncExternalStore(
     subscribeSavedItems,
@@ -93,19 +122,18 @@ export function SavedProvider({ children }: { children: ReactNode }) {
   const toggleSaved = useCallback(async (opportunityId: string) => {
     const items = getSavedSnapshot();
     const existing = items.find((item) => item.opportunityId === opportunityId);
-    writeSavedItems(
-      existing
-        ? items.filter((item) => item.opportunityId !== opportunityId)
-        : [
+    const nextItems = existing
+      ? items.filter((item) => item.opportunityId !== opportunityId)
+      : [
             ...items,
             {
               opportunityId,
-              status: "saved",
+              status: "saved" as const,
               notes: "",
               savedAt: new Date().toISOString(),
             },
-          ],
-    );
+          ];
+    writeSavedItems(nextItems);
 
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
@@ -140,8 +168,7 @@ export function SavedProvider({ children }: { children: ReactNode }) {
         Pick<SavedOpportunity, "notes" | "reminderDate" | "status">
       >,
     ) => {
-      writeSavedItems(
-        getSavedSnapshot().map((item) =>
+      const nextItems = getSavedSnapshot().map((item) =>
           item.opportunityId === opportunityId
             ? {
                 ...item,
@@ -155,11 +182,29 @@ export function SavedProvider({ children }: { children: ReactNode }) {
                   item.status,
               }
             : item,
-        ),
       );
+      writeSavedItems(nextItems);
+      const updatedItem = nextItems.find(
+        (item) => item.opportunityId === opportunityId,
+      );
+      if (updatedItem) void upsertSavedItem(updatedItem);
     },
     [],
   );
+
+  useEffect(() => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    void migrateLocalSavedItems();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") void migrateLocalSavedItems();
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const value = useMemo<SavedContextValue>(
     () => ({

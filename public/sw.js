@@ -1,4 +1,4 @@
-const CACHE_NAME = "awsarsetu-v1";
+const CACHE_NAME = "awsarsetu-v3";
 const OFFLINE_URL = "/offline";
 const APP_SHELL = ["/", "/explore", "/vacancies", "/saved", "/account", OFFLINE_URL, "/brand/awsarsetu-logo.svg"];
 

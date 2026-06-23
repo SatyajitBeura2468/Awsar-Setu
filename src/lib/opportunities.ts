@@ -7,7 +7,7 @@ export const opportunities: Opportunity[] = [
     slug: "national-scholarship-portal-opportunities",
     category: "education-scholarships",
     description:
-      "A discovery record for scholarship opportunities listed through the National Scholarship Portal. Production imports must attach specific scheme notices and dates after official review.",
+      "An official-directory pathway for scholarship opportunities listed through the National Scholarship Portal. Individual scheme records should be imported only after notice-level review.",
     visualCover: "education",
     organisation: "National Scholarship Portal",
     officialUrl: "https://scholarships.gov.in/",
@@ -41,7 +41,7 @@ export const opportunities: Opportunity[] = [
       "Applicants with documents requested by the selected scheme",
     ],
     importantConditions: [
-      "This starter record is not a verified scheme notice.",
+      "This is an official directory, not a verified individual scheme notice.",
       "Deadlines and eligibility must come from the specific official scheme page.",
     ],
     howToApply: [
@@ -50,7 +50,7 @@ export const opportunities: Opportunity[] = [
       "Read eligibility, documents and deadline before registering.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "scholarships.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
@@ -62,13 +62,13 @@ export const opportunities: Opportunity[] = [
     slug: "odisha-public-service-commission-recruitment-notices",
     category: "government-jobs-vacancies",
     description:
-      "A state-specific vacancy discovery record for OPSC recruitment notices. Production data should import each notice with post, qualification, age, deadline and official PDF link.",
+      "An official-directory pathway for Odisha Public Service Commission recruitment notices. AwsarSetu should import individual notices only after official-source review.",
     visualCover: "government-jobs",
     organisation: "Odisha Public Service Commission",
     officialUrl: "https://www.opsc.gov.in/",
     officialActionLabel: "View Official Notice",
     scope: { kind: "state", states: ["Odisha"] },
-    deadline: "2026-07-31",
+    deadline: null,
     benefitType: "job",
     eligibilitySummary:
       "Eligibility depends on the individual recruitment notice, qualification, age rules and category relaxations. Check the official notice before applying.",
@@ -99,7 +99,7 @@ export const opportunities: Opportunity[] = [
       "Applicants who satisfy age and residency rules listed in the notice",
     ],
     importantConditions: [
-      "This starter record is a sample vacancy structure, not a current appointment notice.",
+      "This is an official recruitment directory, not a current appointment notice.",
       "Age relaxation and reservation rules must be verified on the official notice.",
     ],
     howToApply: [
@@ -109,14 +109,14 @@ export const opportunities: Opportunity[] = [
       "Apply only through the official application link.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "opsc.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
     expired: false,
     vacancyType: "government",
     requiredQualification: "Graduation or post-specific qualification",
-    ageRequirementText: "Usually notice-specific; sample range 18-38",
+    ageRequirementText: "Notice-specific",
   },
   {
     id: "apprenticeship-india",
@@ -124,7 +124,7 @@ export const opportunities: Opportunity[] = [
     slug: "apprenticeship-india-openings",
     category: "jobs-internships-apprenticeships",
     description:
-      "A national apprenticeship discovery record for candidates exploring employer-led apprenticeship openings on the official portal.",
+      "An official-directory pathway for candidates exploring employer-led apprenticeship openings on the Apprenticeship India portal.",
     visualCover: "internship",
     organisation: "Apprenticeship India",
     officialUrl: "https://www.apprenticeshipindia.gov.in/",
@@ -169,7 +169,7 @@ export const opportunities: Opportunity[] = [
       "Verify employer details before applying.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "apprenticeshipindia.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
@@ -184,7 +184,7 @@ export const opportunities: Opportunity[] = [
     slug: "skill-india-digital-learning-certification",
     category: "skills-training",
     description:
-      "A training discovery record for skill courses, digital learning and certification pathways available through Skill India Digital Hub.",
+      "An official-directory pathway for skill courses, digital learning and certification pathways available through Skill India Digital Hub.",
     visualCover: "training",
     organisation: "Skill India Digital Hub",
     officialUrl: "https://www.skillindiadigital.gov.in/",
@@ -225,7 +225,7 @@ export const opportunities: Opportunity[] = [
       "Review provider, fee, duration and certificate details.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "skillindiadigital.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
@@ -237,7 +237,7 @@ export const opportunities: Opportunity[] = [
     slug: "pm-kisan-farmer-support-information",
     category: "agriculture-rural-livelihood",
     description:
-      "A national agriculture-support discovery record pointing citizens to the official PM-KISAN portal for verified beneficiary and registration information.",
+      "An official-directory pathway pointing citizens to the PM-KISAN portal for programme information, beneficiary status and official guidance.",
     visualCover: "agriculture",
     organisation: "PM-KISAN",
     officialUrl: "https://pmkisan.gov.in/",
@@ -277,7 +277,7 @@ export const opportunities: Opportunity[] = [
       "Use only official registration or status tools.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "pmkisan.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
@@ -289,7 +289,7 @@ export const opportunities: Opportunity[] = [
     slug: "health-welfare-support-discovery",
     category: "health-welfare-social-support",
     description:
-      "A sample structure for health, disability, senior-citizen, women and social-support opportunities. Production records must link to specific official scheme pages.",
+      "An official-directory pathway for health, disability, senior-citizen, women and social-support services. Individual scheme records must link to specific official pages.",
     visualCover: "welfare",
     organisation: "Official national or state welfare authority",
     officialUrl: "https://services.india.gov.in/",
@@ -327,7 +327,7 @@ export const opportunities: Opportunity[] = [
       "Applicants with documents requested by the official service",
     ],
     importantConditions: [
-      "This is a development sample, not a verified benefit page.",
+      "This is an official service directory, not a verified individual benefit page.",
       "Never upload sensitive medical or disability documents to unofficial websites.",
     ],
     howToApply: [
@@ -336,7 +336,7 @@ export const opportunities: Opportunity[] = [
       "Continue only through the official service link.",
     ],
     lastChecked: "2026-06-22",
-    verificationStatus: "development-sample",
+    contentStatus: "official-directory",
     sourceDomain: "services.india.gov.in",
     createdAt: "2026-06-22",
     updatedAt: "2026-06-22",
@@ -407,10 +407,31 @@ export function getOpportunitiesByCategory(category: Category) {
   return opportunities.filter((opportunity) => opportunity.category === category);
 }
 
+export function getVerifiedActiveOpportunities() {
+  return opportunities.filter(
+    (opportunity) =>
+      opportunity.contentStatus === "verified-active" && !opportunity.expired,
+  );
+}
+
+export function getOfficialDirectoryOpportunities() {
+  return opportunities.filter(
+    (opportunity) => opportunity.contentStatus === "official-directory",
+  );
+}
+
+export function getClosingSoonOpportunities() {
+  return getVerifiedActiveOpportunities().filter(
+    (opportunity) => opportunity.deadline,
+  );
+}
+
 export function getVacancies() {
   return opportunities.filter(
     (opportunity) =>
-      opportunity.category === "government-jobs-vacancies" ||
-      opportunity.vacancyType !== undefined,
+      (opportunity.category === "government-jobs-vacancies" ||
+        opportunity.vacancyType !== undefined) &&
+      opportunity.contentStatus !== "development-sample" &&
+      opportunity.contentStatus !== "unavailable",
   );
 }
