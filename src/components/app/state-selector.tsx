@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPin, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useProfile } from "@/contexts/profile-context";
 import { indianStates, type IndianState } from "@/lib/types";
 
@@ -24,22 +24,24 @@ export function StateSelector() {
     setQuery("");
   };
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   return (
-    <div className="relative flex items-center gap-3">
+    <div className="state-selector">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/80 px-4 py-2 text-sm font-black text-ink shadow-soft transition hover:-translate-y-0.5 hover:border-teal"
+        className="state-button"
       >
-        <MapPin className="h-4 w-4 text-coral" aria-hidden="true" />
+        <MapPin className="h-4 w-4" aria-hidden="true" />
         {profile.state ?? "India"}
-      </button>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/60 px-4 py-2 text-sm font-bold text-slate shadow-soft transition hover:-translate-y-0.5 hover:border-teal"
-      >
-        Change state
       </button>
 
       {open && (
@@ -48,6 +50,9 @@ export function StateSelector() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="state-selector-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setOpen(false);
+          }}
         >
           <div className="state-sheet">
             <button
@@ -58,18 +63,15 @@ export function StateSelector() {
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-teal">
-              Current context
-            </p>
             <h2 id="state-selector-title">
-              Choose the state or Union Territory to focus discovery.
+              Choose your state or Union Territory
             </h2>
             <p>
               This is stored on this device for guests and can sync after sign
               in. India-wide opportunities still appear.
             </p>
             <label className="state-sheet-search">
-              <Search className="h-5 w-5 text-teal" aria-hidden="true" />
+              <Search className="h-5 w-5" aria-hidden="true" />
               <span className="sr-only">Search states</span>
               <input
                 value={query}

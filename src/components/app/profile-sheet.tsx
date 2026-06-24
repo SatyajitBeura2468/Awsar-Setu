@@ -1,7 +1,7 @@
 "use client";
 
-import { Compass, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { X } from "lucide-react";
+import { useEffect, type ReactNode } from "react";
 import { useProfile } from "@/contexts/profile-context";
 import {
   ageBands,
@@ -17,7 +17,6 @@ import {
 } from "@/lib/types";
 import { categoryLabels, educationLabels, roleLabels } from "@/lib/i18n";
 import { useLanguage } from "@/contexts/language-context";
-import { ProfilePulse } from "@/components/experience/experience-primitives";
 
 const ageBandLabels: Record<AgeBand, string> = {
   "under-18": "Under 18",
@@ -37,7 +36,16 @@ export function ProfileSheet({
   onClose: () => void;
 }) {
   const { locale } = useLanguage();
-  const { profile, profileStrength, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile();
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -54,6 +62,9 @@ export function ProfileSheet({
       role="dialog"
       aria-modal="true"
       aria-labelledby="profile-sheet-title"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
     >
       <section className="profile-sheet">
         <button
@@ -64,26 +75,14 @@ export function ProfileSheet({
         >
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
-        <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-mint text-teal-dark">
-            <Compass className="h-6 w-6" aria-hidden="true" />
-          </span>
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-teal">
-              Opportunity compass
-            </p>
-            <h2 id="profile-sheet-title">
-              Add a few signals for safer personal matches.
-            </h2>
-            <p>
-              These details stay lightweight: no Aadhaar, exact date of birth,
-              bank details or sensitive documents.
-            </p>
-          </div>
-        </div>
+        <h2 id="profile-sheet-title">Set up profile preferences</h2>
+        <p>
+          Add only what improves matching: state, age band, education, role and
+          interests. You can browse without completing this.
+        </p>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_12rem]">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <div className="mt-5">
+          <div className="settings-grid">
             <ProfileSelect
               label="State"
               value={profile.state ?? ""}
@@ -151,13 +150,10 @@ export function ProfileSheet({
               ))}
             </ProfileSelect>
           </div>
-          <ProfilePulse strength={profileStrength} label="Profile signal" />
         </div>
 
         <div className="mt-5">
-          <p className="text-xs font-black uppercase tracking-[0.15em] text-slate">
-            Interests
-          </p>
+          <p className="field-group-label">Interests</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {categories.map((category) => (
               <button
@@ -180,7 +176,7 @@ export function ProfileSheet({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl bg-gradient-to-r from-ink to-peacock px-5 py-3 text-sm font-black text-white shadow-glow"
+            className="button-primary"
           >
             Use these signals
           </button>
@@ -206,14 +202,11 @@ function ProfileSelect<T extends string>({
   children: ReactNode;
 }) {
   return (
-    <label className="grid gap-2">
-      <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
-        {label}
-      </span>
+    <label className="settings-field">
+      <span>{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="rounded-2xl border border-white/80 bg-white/86 px-4 py-3 text-sm font-black text-ink shadow-soft outline-none focus:border-teal"
       >
         {children}
       </select>

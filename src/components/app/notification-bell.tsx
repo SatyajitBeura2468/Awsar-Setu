@@ -68,16 +68,15 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={requestPermission}
-        className="relative grid h-11 w-11 place-items-center rounded-full border border-white/80 bg-white/86 text-ink shadow-soft transition hover:-translate-y-0.5 hover:border-teal hover:shadow-glow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal"
+        className="icon-button"
         aria-label="Notification preferences"
       >
-        <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-coral pulse-dot" />
         <Bell className="h-5 w-5" aria-hidden="true" />
       </button>
       {message && (
         <div
           role="status"
-          className="absolute right-0 z-20 mt-3 w-72 rounded-2xl border border-border bg-white p-4 text-sm leading-6 text-slate shadow-card"
+          className="notification-popover"
         >
           {message}
         </div>

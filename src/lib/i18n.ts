@@ -1,4 +1,9 @@
-import type { BenefitType, Category, CurrentRole, EducationLevel } from "./types";
+import type {
+  BenefitType,
+  Category,
+  CurrentRole,
+  EducationLevel,
+} from "./types";
 
 export type Locale = "en" | "hi";
 
@@ -128,10 +133,10 @@ export const copy = {
     account: "खाता",
     matchesForYou: "आपके लिए मिलान",
     matchesGuest:
-      "राज्य, आयु, शिक्षा और रुचियां बताकर बेहतर मिलान देखें। बिना साइन-इन ब्राउज़ करना हमेशा खुला है।",
+      "राज्य, आयु, शिक्षा और रुचियां बताकर बेहतर मिलान देखें। बिना साइन-इन ब्राउज करना हमेशा खुला है।",
     governmentJobs: "सरकारी नौकरियां और रिक्तियां",
     closingSoon: "जल्द समाप्त",
-    exploreByNeed: "ज़रूरत के अनुसार खोजें",
+    exploreByNeed: "जरूरत के अनुसार खोजें",
     newNoteworthy: "नया और महत्वपूर्ण",
     helpfulGuides: "सहायक गाइड",
     officialSource: "आधिकारिक स्रोत",
@@ -145,8 +150,8 @@ export const copy = {
     possible: "संभव मिलान",
     check: "मानदंड जांचें",
     likelyHint:
-      "आपकी प्रोफ़ाइल के आधार पर यह संभावित मिलान है। आवेदन से पहले आधिकारिक पात्रता मानदंड अवश्य जांचें।",
-    browseFirst: "पहले ब्राउज़ करें, साइन-इन वैकल्पिक",
+      "आपकी प्रोफाइल के आधार पर यह संभावित मिलान है। आवेदन से पहले आधिकारिक पात्रता मानदंड अवश्य जांचें।",
+    browseFirst: "पहले ब्राउज करें, साइन-इन वैकल्पिक",
     accountBenefit:
       "अवसर सहेजें, आवेदन ट्रैक करें और आपके लिए उपयुक्त खुली रिक्तियों की सूचनाएं पाएं।",
     signIn: "साइन इन",

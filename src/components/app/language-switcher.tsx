@@ -7,7 +7,7 @@ export function LanguageSwitcher() {
 
   return (
     <div
-      className="flex rounded-full border border-border bg-white p-1 shadow-soft"
+      className="flex rounded-full border border-border bg-white p-1"
       aria-label="Language switcher"
     >
       {(["en", "hi"] as const).map((nextLocale) => (

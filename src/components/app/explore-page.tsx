@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
-import { Filter, RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { Filter, RotateCcw, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
@@ -34,28 +34,15 @@ import {
 import { OpportunityCard } from "@/components/opportunities/opportunity-card";
 import { EmptyState } from "./empty-state";
 import { ProfileSheet } from "./profile-sheet";
-import {
-  OpportunitySignal,
-  TrustStatus,
-} from "@/components/experience/experience-primitives";
 
 type Sort = "newest" | "closing" | "best";
 type DeadlineFilter = "all" | "dated" | "rolling";
-type StatusFilter = ContentStatus | "all";
-type ConfidenceFilter = MatchLevel | "all";
+type StatusFilter = Extract<ContentStatus, "verified-active" | "official-directory"> | "all";
 type StateFilter = IndianState | "all" | "profile";
 
 const sortOptions = ["newest", "closing", "best"] as const;
 const deadlineOptions = ["all", "dated", "rolling"] as const;
-const statusOptions = [
-  "all",
-  "verified-active",
-  "official-directory",
-  "archived",
-  "unavailable",
-  "development-sample",
-] as const;
-const confidenceOptions = ["all", "likely", "possible", "check"] as const;
+const statusOptions = ["all", "verified-active", "official-directory"] as const;
 
 const ageBandLabels: Record<AgeBand, string> = {
   "under-18": "Under 18",
@@ -71,10 +58,12 @@ export function ExplorePage() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
   const { locale, t } = useLanguage();
   const { profile, profileReady } = useProfile();
   const currentQueryString = params.toString();
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [category, setCategory] = useState<Category | "all">(
     safeParam(params.get("category"), categories) ?? "all",
@@ -104,16 +93,20 @@ export function ExplorePage() {
   const [status, setStatus] = useState<StatusFilter>(
     safeParam(params.get("status"), statusOptions) ?? "all",
   );
-  const [confidence, setConfidence] = useState<ConfidenceFilter>(
-    safeParam(params.get("confidence"), confidenceOptions) ?? "all",
-  );
   const [sort, setSort] = useState<Sort>(
     safeParam(params.get("sort"), sortOptions) ?? "newest",
   );
   const [forYou, setForYou] = useState(
     params.get("lens") === "for-you" && profileReady,
   );
-  const [filtersOpen, setFiltersOpen] = useState(true);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setFiltersOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const nextParams = new URLSearchParams();
@@ -128,7 +121,6 @@ export function ExplorePage() {
     if (benefit !== "all") nextParams.set("benefit", benefit);
     if (deadline !== "all") nextParams.set("deadline", deadline);
     if (status !== "all") nextParams.set("status", status);
-    if (confidence !== "all") nextParams.set("confidence", confidence);
     if (sort !== "newest") nextParams.set("sort", sort);
     if (forYou) nextParams.set("lens", "for-you");
 
@@ -143,7 +135,6 @@ export function ExplorePage() {
     ageBand,
     benefit,
     category,
-    confidence,
     currentQueryString,
     deadline,
     education,
@@ -164,11 +155,18 @@ export function ExplorePage() {
 
   const results = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    const effectiveState =
-      state === "profile" ? profile.state ?? "all" : state;
+    const effectiveState = state === "profile" ? profile.state ?? "all" : state;
+
     return opportunities
       .filter((opportunity) => {
-        if (opportunity.contentStatus === "development-sample") return false;
+        if (
+          opportunity.contentStatus === "development-sample" ||
+          opportunity.contentStatus === "archived" ||
+          opportunity.contentStatus === "unavailable"
+        ) {
+          return false;
+        }
+
         const text = [
           opportunity.title,
           opportunity.description,
@@ -179,8 +177,7 @@ export function ExplorePage() {
           .join(" ")
           .toLowerCase();
         const match = matchOpportunity(activeProfile, opportunity);
-        const chosenAgeBand =
-          ageBand === "all" ? activeProfile?.ageBand : ageBand;
+        const chosenAgeBand = ageBand === "all" ? activeProfile?.ageBand : ageBand;
 
         return (
           (!normalized || text.includes(normalized)) &&
@@ -202,7 +199,7 @@ export function ExplorePage() {
             opportunity.educationRequirements.includes("not-specified")) &&
           (chosenAgeBand === undefined ||
             ageBandOverlaps(chosenAgeBand, opportunity.ageBounds) !== false) &&
-          (confidence === "all" || match.level === confidence)
+          (!forYou || match.level !== "check")
         );
       })
       .sort((a, b) => {
@@ -211,8 +208,12 @@ export function ExplorePage() {
             b.deadline ?? "9999-12-31",
           );
         }
-        if (sort === "best") {
-          const order = { likely: 0, possible: 1, check: 2 };
+        if (sort === "best" || forYou) {
+          const order: Record<MatchLevel, number> = {
+            likely: 0,
+            possible: 1,
+            check: 2,
+          };
           return (
             order[matchOpportunity(activeProfile, a).level] -
             order[matchOpportunity(activeProfile, b).level]
@@ -225,13 +226,13 @@ export function ExplorePage() {
     ageBand,
     benefit,
     category,
-    confidence,
     deadline,
     education,
+    forYou,
+    profile.state,
     query,
     role,
     sort,
-    profile.state,
     state,
     status,
   ]);
@@ -241,14 +242,9 @@ export function ExplorePage() {
       label: categoryLabels[category][locale],
       reset: () => setCategory("all"),
     },
-    state !== "all" && {
-      label:
-        state === "profile"
-          ? profile.state
-            ? `Context: ${profile.state}`
-            : "Context: India"
-          : state,
-      reset: () => setState("all"),
+    state !== "profile" && {
+      label: state === "all" ? "All states" : state,
+      reset: () => setState("profile"),
     },
     ageBand !== "all" && {
       label: ageBandLabels[ageBand],
@@ -262,40 +258,31 @@ export function ExplorePage() {
       label: educationLabels[education][locale],
       reset: () => setEducation("all"),
     },
-    status !== "all" && {
-      label: status.replace("-", " "),
-      reset: () => setStatus("all"),
-    },
     benefit !== "all" && {
       label: benefitLabels[benefit][locale],
       reset: () => setBenefit("all"),
+    },
+    status !== "all" && {
+      label: status === "verified-active" ? "Verified active" : "Official directory",
+      reset: () => setStatus("all"),
     },
     deadline !== "all" && {
       label: deadline === "dated" ? "Has deadline" : "Open or directory",
       reset: () => setDeadline("all"),
     },
-    confidence !== "all" && {
-      label:
-        confidence === "likely"
-          ? "Likely Match"
-          : confidence === "possible"
-            ? "Possible Match"
-            : "Check Criteria",
-      reset: () => setConfidence("all"),
-    },
   ].filter(Boolean) as Array<{ label: string; reset: () => void }>;
 
   const resetFilters = () => {
     setCategory("all");
-    setState("all");
+    setState("profile");
     setAgeBand("all");
     setRole("all");
     setEducation("all");
     setBenefit("all");
     setDeadline("all");
     setStatus("all");
-    setConfidence("all");
     setQuery("");
+    setForYou(false);
   };
 
   const enableForYou = () => {
@@ -304,95 +291,151 @@ export function ExplorePage() {
       return;
     }
     setForYou(true);
+    setSort("best");
   };
 
   return (
-    <div className="space-y-7">
-      <section className="command-deck">
-        <div className="command-deck-heading">
-          <div>
-            <OpportunitySignal
-              label={forYou ? "For You lens active" : "All opportunities"}
-              active={forYou}
-            />
-            <h1>{t("explore")}</h1>
-            <p>
-              Search and filter trusted opportunity pathways. Match labels are
-              guidance only and never guarantee eligibility.
-            </p>
-          </div>
-          <div className="command-toggle">
-            <button
-              type="button"
-              onClick={() => setForYou(false)}
-              className={!forYou ? "is-active" : ""}
-            >
-              All Opportunities
-            </button>
-            <button
-              type="button"
-              onClick={enableForYou}
-              className={forYou ? "is-active" : ""}
-            >
-              For You
-            </button>
-          </div>
+    <div className="explore-page">
+      <section className="explore-hero">
+        <div>
+          <h1>{t("explore")}</h1>
+          <p>
+            Search trusted pathways and verified notices. Match labels are
+            guidance only.
+          </p>
         </div>
+        <a href="/explore?category=government-jobs-vacancies" className="text-link">
+          Browse vacancies
+        </a>
+      </section>
 
-        <div className="command-search">
-          <Search className="h-5 w-5 text-teal" aria-hidden="true" />
+      <section className="explore-controls" aria-label="Search and filters">
+        <div className="explore-search">
+          <Search className="h-5 w-5" aria-hidden="true" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("searchPlaceholder")}
           />
-          <select
-            value={sort}
-            onChange={(event) => setSort(event.target.value as Sort)}
-            aria-label="Sort opportunities"
-          >
-            <option value="newest">Newest</option>
-            <option value="closing">Closing Soon</option>
-            <option value="best">Best Match</option>
-          </select>
         </div>
-
-        <div className="lens-row">
-          {["scholarships", "Odisha vacancies", "digital skills"].map(
-            (suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => setQuery(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ),
-          )}
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={() => setFiltersOpen(true)}
+        >
+          <Filter className="h-4 w-4" aria-hidden="true" />
+          Filters
+        </button>
+        <select
+          value={sort}
+          onChange={(event) => setSort(event.target.value as Sort)}
+          aria-label="Sort opportunities"
+          className="control-select"
+        >
+          <option value="newest">Newest</option>
+          <option value="closing">Closing soon</option>
+          <option value="best">Best match</option>
+        </select>
+        <div className="segmented-control" aria-label="Personalisation lens">
+          <button
+            type="button"
+            onClick={() => setForYou(false)}
+            className={!forYou ? "is-active" : ""}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            onClick={enableForYou}
+            className={forYou ? "is-active" : ""}
+          >
+            For You
+          </button>
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
-        <aside className="filter-deck">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen((value) => !value)}
-            className="filter-deck-title"
-          >
-            <span>
-              <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
-            </span>
-            Filters
-            <Filter className="ml-auto h-4 w-4" aria-hidden="true" />
+      {activeChips.length > 0 && (
+        <div className="active-filter-row" aria-label="Active filters">
+          {activeChips.map((chip) => (
+            <button key={chip.label} type="button" onClick={chip.reset}>
+              {chip.label}
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          ))}
+          <button type="button" onClick={resetFilters}>
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+            Reset
           </button>
-          <AnimatePresence initial={false}>
-            {filtersOpen && (
-              <motion.div
-                className="filter-deck-body"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-              >
+        </div>
+      )}
+
+      <div className="results-summary">
+        <strong>
+          {results.length} result{results.length === 1 ? "" : "s"}
+        </strong>
+        <span>
+          {forYou
+            ? "Showing likely and possible matches from your profile."
+            : "Showing trusted public pathways."}
+        </span>
+      </div>
+
+      {results.length ? (
+        <div className="opportunity-list two-column">
+          {results.map((opportunity) => (
+            <OpportunityCard
+              key={opportunity.id}
+              opportunity={opportunity}
+              profile={activeProfile}
+            />
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="No results in this search"
+          description="Try fewer filters, official directories, or a nearby category. AwsarSetu will not fill gaps with unverified records."
+          actionHref="/explore?status=official-directory"
+          actionLabel="Show official directories"
+        />
+      )}
+
+      <AnimatePresence>
+        {filtersOpen && (
+          <motion.div
+            className="filter-sheet-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="filter-sheet-title"
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setFiltersOpen(false);
+            }}
+          >
+            <motion.aside
+              className="filter-sheet"
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, x: 24 }}
+              transition={{ duration: reduceMotion ? 0 : 0.2 }}
+            >
+              <div className="sheet-header">
+                <div>
+                  <h2 id="filter-sheet-title">Filters</h2>
+                  <p>Keep only what helps narrow the search.</p>
+                </div>
+                <button
+                  type="button"
+                  className="icon-button"
+                  onClick={() => setFiltersOpen(false)}
+                  aria-label="Close filters"
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div className="filter-fields">
                 <FilterSelect label="Category" value={category} onChange={setCategory}>
                   <option value="all">All categories</option>
                   {categories.map((item) => (
@@ -401,9 +444,9 @@ export function ExplorePage() {
                     </option>
                   ))}
                 </FilterSelect>
-                <FilterSelect label="State" value={state} onChange={setState}>
+                <FilterSelect label="Location" value={state} onChange={setState}>
                   <option value="profile">Use current context</option>
-                  <option value="all">National or all states</option>
+                  <option value="all">India-wide and all states</option>
                   {indianStates.map((item) => (
                     <option key={item} value={item}>
                       {item}
@@ -426,7 +469,7 @@ export function ExplorePage() {
                     </option>
                   ))}
                 </FilterSelect>
-                <FilterSelect label="Current role" value={role} onChange={setRole}>
+                <FilterSelect label="Role" value={role} onChange={setRole}>
                   <option value="all">Any role</option>
                   {currentRoles.map((item) => (
                     <option key={item} value={item}>
@@ -442,97 +485,39 @@ export function ExplorePage() {
                     </option>
                   ))}
                 </FilterSelect>
-                <FilterSelect label="Deadline" value={deadline} onChange={setDeadline}>
-                  <option value="all">Any deadline</option>
-                  <option value="dated">Has notice deadline</option>
-                  <option value="rolling">Open or directory</option>
-                </FilterSelect>
-                <FilterSelect label="Content status" value={status} onChange={setStatus}>
-                  <option value="all">All trusted statuses</option>
+                <FilterSelect label="Status" value={status} onChange={setStatus}>
+                  <option value="all">Trusted records</option>
                   <option value="verified-active">Verified active</option>
                   <option value="official-directory">Official directory</option>
                 </FilterSelect>
-                <FilterSelect
-                  label="Eligibility confidence"
-                  value={confidence}
-                  onChange={setConfidence}
-                >
-                  <option value="all">All</option>
-                  <option value="likely">Likely Match</option>
-                  <option value="possible">Possible Match</option>
-                  <option value="check">Check Criteria</option>
+                <FilterSelect label="Deadline" value={deadline} onChange={setDeadline}>
+                  <option value="all">Any deadline</option>
+                  <option value="dated">Has verified deadline</option>
+                  <option value="rolling">Open or directory</option>
                 </FilterSelect>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </aside>
+              </div>
 
-        <section>
-          <div className="result-toolbar">
-            <div>
-              <motion.p
-                key={results.length}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                {results.length} result{results.length === 1 ? "" : "s"}
-              </motion.p>
-              <span>
-                {forYou
-                  ? "Profile lens is active."
-                  : "All trusted pathways are visible."}
-              </span>
-            </div>
-            <button type="button" onClick={resetFilters}>
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              Reset
-            </button>
-          </div>
-
-          {activeChips.length > 0 && (
-            <div className="active-lenses">
-              {activeChips.map((chip) => (
-                <button key={chip.label} type="button" onClick={chip.reset}>
-                  {chip.label}
-                  <X className="h-3.5 w-3.5" aria-hidden="true" />
+              <div className="sheet-actions">
+                <button type="button" className="button-primary" onClick={() => setFiltersOpen(false)}>
+                  Apply filters
                 </button>
-              ))}
-            </div>
-          )}
-
-          {results.length ? (
-            <motion.div layout className="grid gap-5 md:grid-cols-2">
-              {results.map((opportunity, index) => (
-                <motion.div layout key={opportunity.id}>
-                  <OpportunityCard
-                    opportunity={opportunity}
-                    profile={activeProfile}
-                    priority={index < 2}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          ) : (
-            <EmptyState
-              title="No close matches in this lens"
-              description="Try removing one filter, using official directories, or checking a nearby category. AwsarSetu avoids filling empty states with unverified sample content."
-              actionHref="/explore?status=official-directory"
-              actionLabel="Show official directories"
-            />
-          )}
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            <TrustStatus status="verified-active" />
-            <TrustStatus status="official-directory" />
-          </div>
-        </section>
-      </div>
+                <button type="button" className="button-secondary" onClick={resetFilters}>
+                  Reset
+                </button>
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ProfileSheet
         open={profileSheetOpen}
         onClose={() => {
           setProfileSheetOpen(false);
-          if (profileReady) setForYou(true);
+          if (profileReady) {
+            setForYou(true);
+            setSort("best");
+          }
         }}
       />
     </div>
@@ -564,7 +549,7 @@ function FilterSelect<T extends string>({
   children: ReactNode;
 }) {
   return (
-    <label className="grid gap-2">
+    <label className="filter-field">
       <span>{label}</span>
       <select
         value={value}

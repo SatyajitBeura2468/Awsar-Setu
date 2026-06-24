@@ -12,7 +12,7 @@ export function SectionHeading({
   return (
     <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
       <div>
-        <div className="mb-3 h-1.5 w-16 rounded-full bg-gradient-to-r from-coral via-saffron to-teal" />
+        <div className="mb-3 h-1 w-14 rounded-full bg-blue" />
         <h2 className="text-3xl font-black tracking-tight text-ink md:text-4xl">
           {title}
         </h2>

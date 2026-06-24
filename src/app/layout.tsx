@@ -10,11 +10,11 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://awsarsetu.app";
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "AwsarSetu | Opportunity Atlas for India",
+    default: "AwsarSetu | Public opportunity discovery for India",
     template: "%s | AwsarSetu",
   },
   description:
-    "Find scholarships, vacancies, schemes, training and support through a clear, source-first Opportunity Atlas.",
+    "Find scholarships, vacancies, schemes, training and support through a clear, source-first public opportunity platform.",
   manifest: "/manifest.webmanifest",
   applicationName: "AwsarSetu",
   alternates: {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AwsarSetu",
     description:
-      "A citizen-first Opportunity Atlas for scholarships, vacancies, schemes, training and support across India.",
+      "A citizen-first platform for scholarships, vacancies, schemes, training and support across India.",
     url: appUrl,
     siteName: "AwsarSetu",
     type: "website",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFF8EF",
+  themeColor: "#F6F8FA",
   colorScheme: "light",
 };
 

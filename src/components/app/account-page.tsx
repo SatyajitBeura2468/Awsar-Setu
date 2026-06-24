@@ -1,9 +1,8 @@
 "use client";
 
-import { BellRing, ShieldCheck, UserRoundCog } from "lucide-react";
+import { BellRing, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { AuthPanel } from "@/components/auth/auth-panel";
-import { ProfilePulse } from "@/components/experience/experience-primitives";
 import { useLanguage } from "@/contexts/language-context";
 import { useProfile } from "@/contexts/profile-context";
 import { categoryLabels, educationLabels, roleLabels } from "@/lib/i18n";
@@ -54,141 +53,115 @@ export function AccountPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <section className="account-hero">
-        <div>
-          <p>{t("account")}</p>
-          <h1>{t("accountBenefit")}</h1>
-          <span>
-            Your profile is optional, local-first for guests, and used only to
-            make match labels less generic.
-          </span>
+    <div className="settings-page">
+      <header className="page-heading">
+        <h1>{t("account")}</h1>
+        <p>
+          Save opportunities, track applications and receive quiet alerts when
+          configuration is available. Your profile remains optional.
+        </p>
+      </header>
+
+      <AuthPanel />
+
+      <section className="settings-section">
+        <div className="section-title-row">
+          <div>
+            <h2>Profile preferences</h2>
+            <p>Only add details that improve matching. You can browse without them.</p>
+          </div>
+          <span className="progress-label">{profileStrength}% complete</span>
         </div>
-        <ProfilePulse strength={profileStrength} label="Profile strength" />
+        <div className="profile-progress" aria-label={`Profile ${profileStrength}% complete`}>
+          <span style={{ width: `${profileStrength}%` }} />
+        </div>
+
+        <div className="settings-grid">
+          <ProfileSelect
+            label="State"
+            value={profile.state ?? ""}
+            onChange={(value) =>
+              updateProfile({ state: value ? (value as IndianState) : undefined })
+            }
+          >
+            <option value="">Choose state</option>
+            {indianStates.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </ProfileSelect>
+          <ProfileSelect
+            label="Age band"
+            value={profile.ageBand ?? ""}
+            onChange={(value) =>
+              updateProfile({ ageBand: value ? (value as AgeBand) : undefined })
+            }
+          >
+            <option value="">Choose age band</option>
+            {ageBands.map((ageBand) => (
+              <option key={ageBand} value={ageBand}>
+                {ageBandLabels[ageBand]}
+              </option>
+            ))}
+          </ProfileSelect>
+          <ProfileSelect
+            label="Education level"
+            value={profile.educationLevel ?? ""}
+            onChange={(value) =>
+              updateProfile({
+                educationLevel: value ? (value as EducationLevel) : undefined,
+              })
+            }
+          >
+            <option value="">Choose education</option>
+            {educationLevels.map((level) => (
+              <option key={level} value={level}>
+                {educationLabels[level][locale]}
+              </option>
+            ))}
+          </ProfileSelect>
+          <ProfileSelect
+            label="Current role"
+            value={profile.currentRole ?? ""}
+            onChange={(value) =>
+              updateProfile({
+                currentRole: value ? (value as CurrentRole) : undefined,
+              })
+            }
+          >
+            <option value="">Choose role</option>
+            {currentRoles.map((role) => (
+              <option key={role} value={role}>
+                {roleLabels[role][locale]}
+              </option>
+            ))}
+          </ProfileSelect>
+        </div>
+
+        <div className="interest-group">
+          <p>Areas of interest</p>
+          <div>
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleInterest(category)}
+                className={
+                  profile.interests.includes(category)
+                    ? "profile-chip is-selected"
+                    : "profile-chip"
+                }
+              >
+                {categoryLabels[category][locale]}
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <AuthPanel />
-
-        <section className="compass-panel">
-          <div className="flex items-start gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-mint to-white text-teal-dark shadow-soft">
-              <UserRoundCog className="h-6 w-6" aria-hidden="true" />
-            </span>
-            <div>
-              <h2>Opportunity Compass</h2>
-              <p>
-                Add only what improves matching: state, age band, education,
-                role and interests. Optional fields stay optional.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <ProfileSelect
-              label="State"
-              value={profile.state ?? ""}
-              onChange={(value) =>
-                updateProfile({
-                  state: value ? (value as IndianState) : undefined,
-                })
-              }
-            >
-              <option value="">Choose state</option>
-              {indianStates.map((state) => (
-                <option key={state} value={state}>
-                  {state}
-                </option>
-              ))}
-            </ProfileSelect>
-            <ProfileSelect
-              label="Age band"
-              value={profile.ageBand ?? ""}
-              onChange={(value) =>
-                updateProfile({
-                  ageBand: value ? (value as AgeBand) : undefined,
-                })
-              }
-            >
-              <option value="">Choose age band</option>
-              {ageBands.map((ageBand) => (
-                <option key={ageBand} value={ageBand}>
-                  {ageBandLabels[ageBand]}
-                </option>
-              ))}
-            </ProfileSelect>
-            <ProfileSelect
-              label="Education level"
-              value={profile.educationLevel ?? ""}
-              onChange={(value) =>
-                updateProfile({
-                  educationLevel: value
-                    ? (value as EducationLevel)
-                    : undefined,
-                })
-              }
-            >
-              <option value="">Choose education</option>
-              {educationLevels.map((level) => (
-                <option key={level} value={level}>
-                  {educationLabels[level][locale]}
-                </option>
-              ))}
-            </ProfileSelect>
-            <ProfileSelect
-              label="Current role"
-              value={profile.currentRole ?? ""}
-              onChange={(value) =>
-                updateProfile({
-                  currentRole: value ? (value as CurrentRole) : undefined,
-                })
-              }
-            >
-              <option value="">Choose role</option>
-              {currentRoles.map((role) => (
-                <option key={role} value={role}>
-                  {roleLabels[role][locale]}
-                </option>
-              ))}
-            </ProfileSelect>
-          </div>
-
-          <div className="mt-5">
-            <p className="text-sm font-black uppercase tracking-[0.16em] text-slate">
-              Areas of interest
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => toggleInterest(category)}
-                  className={
-                    profile.interests.includes(category)
-                      ? "profile-chip is-selected"
-                      : "profile-chip"
-                  }
-                >
-                  {categoryLabels[category][locale]}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-teal/20 bg-mint/60 p-4 text-sm leading-6 text-ink">
-            <ShieldCheck className="mb-2 h-5 w-5 text-teal" aria-hidden="true" />
-            AwsarSetu does not ask for Aadhaar, exact date of birth, bank
-            details, caste certificate details, disability records, detailed
-            medical data or sensitive documents.
-          </div>
-        </section>
-      </div>
-
-      <section className="compass-panel">
-        <div className="flex items-start gap-4">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-saffron/30 to-white text-coral shadow-soft">
-            <BellRing className="h-6 w-6" aria-hidden="true" />
-          </span>
+      <section className="settings-section">
+        <div className="section-title-row">
           <div>
             <h2>Notification preferences</h2>
             <p>
@@ -197,14 +170,13 @@ export function AccountPage() {
                 : "Notifications are not configured yet. Add VAPID and Supabase credentials before enabling browser alerts."}
             </p>
           </div>
+          <BellRing className="h-5 w-5 text-blue" aria-hidden="true" />
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <div className="toggle-list">
           <PreferenceToggle
             label="Browser notifications"
             disabled={!notificationsConfigured}
-            checked={
-              notificationsConfigured && notificationPreferences.browserEnabled
-            }
+            checked={notificationsConfigured && notificationPreferences.browserEnabled}
             onChange={(checked) =>
               updateNotificationPreferences({ browserEnabled: checked })
             }
@@ -231,13 +203,20 @@ export function AccountPage() {
                 ]
               }
               onChange={(checked) =>
-                updateNotificationPreferences({
-                  categories: { [key]: checked },
-                })
+                updateNotificationPreferences({ categories: { [key]: checked } })
               }
             />
           ))}
         </div>
+      </section>
+
+      <section className="settings-section privacy-note">
+        <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+        <p>
+          AwsarSetu does not ask for Aadhaar, exact date of birth, bank details,
+          caste certificate details, disability records, detailed medical data
+          or sensitive documents.
+        </p>
       </section>
     </div>
   );
@@ -255,15 +234,9 @@ function ProfileSelect({
   children: ReactNode;
 }) {
   return (
-    <label className="grid gap-2">
-      <span className="text-xs font-black uppercase tracking-[0.15em] text-slate">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="rounded-2xl border border-white/80 bg-white/78 px-4 py-3 text-sm font-bold text-ink shadow-soft outline-none transition focus:border-teal focus:bg-white"
-      >
+    <label className="settings-field">
+      <span>{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)}>
         {children}
       </select>
     </label>
@@ -282,17 +255,16 @@ function PreferenceToggle({
   disabled?: boolean;
 }) {
   return (
-    <label className="dock-item flex items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/72 p-4 text-sm font-bold text-ink shadow-soft transition hover:-translate-y-0.5">
+    <label className="preference-toggle">
       <span>
         {label}
-        {disabled && <small> Not configured</small>}
+        {disabled && <small>Not configured</small>}
       </span>
       <input
         type="checkbox"
         checked={checked}
         disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
-        className="h-5 w-5 accent-teal disabled:opacity-40"
       />
     </label>
   );

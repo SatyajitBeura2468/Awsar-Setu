@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ExternalLink, Info, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import type { ContentStatus, Opportunity } from "@/lib/types";
 
 export function MotionProvider({ children }: { children: ReactNode }) {
@@ -23,10 +23,10 @@ export function RouteTransition({ children }: { children: ReactNode }) {
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={pathname}
-        initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
-        transition={{ duration: reduceMotion ? 0 : 0.24, ease: "easeOut" }}
+        initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.16, ease: "easeOut" }}
       >
         {children}
       </motion.div>
@@ -35,13 +35,7 @@ export function RouteTransition({ children }: { children: ReactNode }) {
 }
 
 export function AtlasBackground() {
-  return (
-    <div className="atlas-background" aria-hidden="true">
-      <span className="atlas-haze atlas-haze-one" />
-      <span className="atlas-haze atlas-haze-two" />
-      <span className="atlas-haze atlas-haze-three" />
-    </div>
-  );
+  return <div className="site-glow" aria-hidden="true" />;
 }
 
 export function InteractiveSurface({
@@ -51,15 +45,7 @@ export function InteractiveSurface({
   children: ReactNode;
   className?: string;
 }) {
-  return (
-    <motion.div
-      className={`interactive-surface ${className}`}
-      whileHover={{ y: -3 }}
-      transition={{ duration: 0.18, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 export function MagneticAction({
@@ -74,16 +60,9 @@ export function MagneticAction({
   onClick?: () => void;
 }) {
   return (
-    <motion.button
-      type={type}
-      onClick={onClick}
-      className={`magnetic-action ${className}`}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ y: -1 }}
-      transition={{ duration: 0.16 }}
-    >
+    <button type={type} onClick={onClick} className={className}>
       {children}
-    </motion.button>
+    </button>
   );
 }
 
@@ -99,10 +78,10 @@ export function RevealSequence({
   return (
     <motion.div
       className={className}
-      initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: reduceMotion ? 0 : 0.42, ease: "easeOut" }}
+      initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: reduceMotion ? 0 : 0.2 }}
     >
       {children}
     </motion.div>
@@ -192,7 +171,6 @@ export function OpportunitySignal({
 }) {
   return (
     <span className={`opportunity-signal ${active ? "is-active" : ""}`}>
-      <span className="opportunity-signal-dot" />
       {label}
     </span>
   );
@@ -208,15 +186,21 @@ export function SourceExitSheet({
   children?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const reduceMotion = useReducedMotion();
   const status = contentStatusCopy[opportunity.contentStatus];
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={className}
-      >
+      <button type="button" onClick={() => setOpen(true)} className={className}>
         {children ?? opportunity.officialActionLabel}
       </button>
 
@@ -227,16 +211,19 @@ export function SourceExitSheet({
             role="dialog"
             aria-modal="true"
             aria-labelledby={`source-sheet-${opportunity.id}`}
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={reduceMotion ? { opacity: 1 } : { opacity: 0 }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setOpen(false);
+            }}
           >
             <motion.div
               className="source-sheet"
-              initial={{ opacity: 0, y: 24, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
+              initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18, ease: "easeOut" }}
             >
               <button
                 type="button"
@@ -247,7 +234,7 @@ export function SourceExitSheet({
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
               <div className="source-sheet-icon">
-                <ShieldCheck className="h-7 w-7" aria-hidden="true" />
+                <ShieldCheck className="h-6 w-6" aria-hidden="true" />
               </div>
               <h2 id={`source-sheet-${opportunity.id}`}>
                 You are leaving AwsarSetu
@@ -299,9 +286,8 @@ export function SourceExitSheet({
 
 export function InlineTrustLink() {
   return (
-    <Link href="/privacy" className="inline-flex items-center gap-2">
+    <Link href="/privacy" className="text-link">
       Trust and privacy
-      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
     </Link>
   );
 }
