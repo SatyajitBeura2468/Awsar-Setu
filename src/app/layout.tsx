@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/noto-sans";
 import "@fontsource-variable/noto-sans-devanagari";
 import "./globals.css";
+import "./v5.css";
 import { AppProviders } from "@/components/app/app-providers";
 import { AppShell } from "@/components/app/app-shell";
 
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#F6F8FA",
+  themeColor: "#F4F8FC",
   colorScheme: "light",
 };
 

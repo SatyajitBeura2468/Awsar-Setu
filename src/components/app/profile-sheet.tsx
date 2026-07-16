@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useProfile } from "@/contexts/profile-context";
 import {
   ageBands,
@@ -17,6 +17,7 @@ import {
 } from "@/lib/types";
 import { categoryLabels, educationLabels, roleLabels } from "@/lib/i18n";
 import { useLanguage } from "@/contexts/language-context";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 
 const ageBandLabels: Record<AgeBand, string> = {
   "under-18": "Under 18",
@@ -37,15 +38,7 @@ export function ProfileSheet({
 }) {
   const { locale } = useLanguage();
   const { profile, updateProfile } = useProfile();
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+  const dialogRef = useDialogFocus<HTMLElement>(open, onClose);
 
   if (!open) return null;
 
@@ -66,7 +59,7 @@ export function ProfileSheet({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="profile-sheet">
+      <section className="profile-sheet" ref={dialogRef}>
         <button
           type="button"
           onClick={onClose}

@@ -4,8 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ExternalLink, Info, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useState, type CSSProperties, type ReactNode } from "react";
 import type { ContentStatus, Opportunity } from "@/lib/types";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 
 export function MotionProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
@@ -188,15 +189,8 @@ export function SourceExitSheet({
   const [open, setOpen] = useState(false);
   const reduceMotion = useReducedMotion();
   const status = contentStatusCopy[opportunity.contentStatus];
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
+  const close = useCallback(() => setOpen(false), []);
+  const dialogRef = useDialogFocus<HTMLDivElement>(open, close);
 
   return (
     <>
@@ -220,6 +214,7 @@ export function SourceExitSheet({
           >
             <motion.div
               className="source-sheet"
+              ref={dialogRef}
               initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
@@ -227,7 +222,7 @@ export function SourceExitSheet({
             >
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={close}
                 className="source-sheet-close"
                 aria-label="Close source preflight"
               >
@@ -272,7 +267,7 @@ export function SourceExitSheet({
                   Continue to official source
                   <ExternalLink className="h-4 w-4" aria-hidden="true" />
                 </a>
-                <button type="button" onClick={() => setOpen(false)}>
+                <button type="button" onClick={close}>
                   Stay on AwsarSetu
                 </button>
               </div>

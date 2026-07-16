@@ -16,18 +16,17 @@ test("guest can browse, set profile signals, save locally and view tracker", asy
 
   await page.goto("/explore");
   await page.getByRole("button", { name: /For You/i }).click();
-  await expect(
-    page.getByRole("heading", { name: /Set up profile preferences/i }),
-  ).toBeVisible();
+  const profileDialog = page.getByRole("dialog", { name: /Set up profile preferences/i });
+  await expect(profileDialog).toBeVisible();
 
-  await page.getByLabel("State").selectOption("Odisha");
-  await page.getByLabel("Age band").selectOption("18-24");
-  await page.getByLabel("Education level").selectOption("graduate");
-  await page.getByLabel("Current role").selectOption("job-seeker");
-  await page
+  await profileDialog.getByLabel("State").selectOption("Odisha");
+  await profileDialog.getByLabel("Age band").selectOption("18-24");
+  await profileDialog.getByLabel("Education level").selectOption("graduate");
+  await profileDialog.getByLabel("Current role").selectOption("job-seeker");
+  await profileDialog
     .getByRole("button", { name: /Government Jobs and Vacancies/i })
     .click();
-  await page.getByRole("button", { name: /Use these signals/i }).click();
+  await profileDialog.getByRole("button", { name: /Use these signals/i }).click();
 
   await expect(page).toHaveURL(/lens=for-you/);
   await expect(page.getByText(/likely and possible matches/i)).toBeVisible();
@@ -65,26 +64,28 @@ test("explore URL filters control search, sorting and filter sheet", async ({
   await expect(page.getByPlaceholder(/Search scholarships/i)).toHaveValue(
     "Odisha",
   );
-  await expect(page.getByLabel("Sort opportunities")).toHaveValue("best");
+  await expect(page.getByRole("button", { name: "Best match" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: /Odisha Public/i })).toBeVisible();
 
-  await page.getByRole("button", { name: /Filters/i }).click();
-  await expect(page.getByLabel("Category")).toHaveValue(
+  if ((page.viewportSize()?.width ?? 0) < 980) {
+    await page.getByRole("button", { name: /Filters/i }).click();
+  }
+  const filterSurface = (page.viewportSize()?.width ?? 0) < 980
+    ? page.getByRole("dialog", { name: "Filters" })
+    : page.getByRole("complementary", { name: "Filters" });
+  await expect(filterSurface.getByLabel(/Category|Opportunity type/)).toHaveValue(
     "government-jobs-vacancies",
   );
-  await expect(page.getByLabel("Location")).toHaveValue("Odisha");
-  await expect(page.getByLabel("Age band")).toHaveValue("18-24");
-  await expect(page.getByLabel("Benefit type")).toHaveValue("job");
-  await expect(page.getByLabel("Status")).not.toContainText(
+  await expect(filterSurface.getByLabel("Location")).toHaveValue("Odisha");
+  await expect(filterSurface.getByLabel("Age band")).toHaveValue("18-24");
+  await expect(filterSurface.getByLabel(/Benefit/)).toHaveValue("job");
+  await expect(filterSurface.getByLabel(/Status|Trust status/)).not.toContainText(
     "development-sample",
   );
 
-  await page.getByLabel("Role").selectOption("job-seeker");
+  await filterSurface.getByLabel(/Role|Who it is for/).selectOption("job-seeker");
   await expect(page).toHaveURL(/role=job-seeker/);
-  await page
-    .getByLabel("Filters", { exact: true })
-    .getByRole("button", { name: "Reset" })
-    .click();
+  await filterSurface.getByRole("button", { name: /Reset/ }).click();
   await expect(page).not.toHaveURL(/q=Odisha/);
 });
 
@@ -114,6 +115,7 @@ test("account shows truthful notification configuration state", async ({ page })
   await page.goto("/account");
   await expect(page.getByRole("heading", { name: "Account" })).toBeVisible();
   await expect(page.getByText("Profile preferences")).toBeVisible();
+  await page.getByRole("button", { name: /Quiet alerts/i }).click();
   await expect(
     page.getByText(/Notifications are not configured yet/i),
   ).toBeVisible();
@@ -130,11 +132,13 @@ test("keyboard escape closes major overlays", async ({ page }) => {
     page.getByRole("heading", { name: /Choose your state/i }),
   ).toHaveCount(0);
 
-  await page.goto("/explore");
-  await page.getByRole("button", { name: /Filters/i }).click();
-  await expect(page.getByRole("heading", { name: "Filters" })).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("heading", { name: "Filters" })).toHaveCount(0);
+  if ((page.viewportSize()?.width ?? 0) < 980) {
+    await page.goto("/explore");
+    await page.getByRole("button", { name: /Filters/i }).click();
+    await expect(page.getByRole("heading", { name: "Filters" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("heading", { name: "Filters" })).toHaveCount(0);
+  }
 
   await page.goto(
     "/opportunities/odisha-public-service-commission-recruitment-notices",

@@ -1,10 +1,12 @@
 # AwsarSetu
 
-AwsarSetu is an independent, citizen-first opportunity discovery platform for India.
+AwsarSetu is an independent, citizen-first opportunity navigation system for India.
 
 Core promise: **Find opportunities made for your next step.**
 
 It helps people browse scholarships, jobs, vacancies, schemes, training and support without forcing sign-in. Accounts are optional for syncing saves, application tracking, profile-based matches and quiet notifications.
+
+The V5 experience uses a source-first route map, editorial discovery lists, decision-oriented opportunity pages, a saved-application journey and progressive profile controls. Every public browsing flow remains usable without an account.
 
 AwsarSetu is not a government website, official authority, partner or endorsement channel.
 

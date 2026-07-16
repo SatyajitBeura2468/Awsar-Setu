@@ -29,6 +29,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-canvas text-ink">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <header className="site-header">
         <div className="site-header-inner">
           <Link href="/" className="site-logo-link" aria-label="AwsarSetu home">
@@ -59,7 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="site-main">
+      <main className="site-main" id="main-content">
         <RouteTransition>{children}</RouteTransition>
       </main>
 

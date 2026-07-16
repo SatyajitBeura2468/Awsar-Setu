@@ -33,8 +33,8 @@ export function VacanciesPage() {
   );
 
   return (
-    <div className="explore-page">
-      <header className="page-heading">
+    <div className="explore-page v5-explore">
+      <header className="v5-page-intro">
         <h1>Vacancies</h1>
         <p>
           Government jobs, university posts, apprenticeships, internships and
@@ -59,7 +59,7 @@ export function VacanciesPage() {
       </div>
 
       {vacancies.length ? (
-        <div className="opportunity-list two-column">
+        <div className="opportunity-list">
           {vacancies.map((opportunity) => (
             <OpportunityCard
               key={opportunity.id}
