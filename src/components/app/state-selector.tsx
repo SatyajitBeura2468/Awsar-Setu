@@ -1,14 +1,17 @@
 "use client";
 
 import { MapPin, Search, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useProfile } from "@/contexts/profile-context";
 import { indianStates, type IndianState } from "@/lib/types";
+import { useDialogFocus } from "@/hooks/use-dialog-focus";
 
 export function StateSelector() {
   const { profile, setProfileState } = useProfile();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const close = useCallback(() => setOpen(false), []);
+  const dialogRef = useDialogFocus<HTMLDivElement>(open, close);
 
   const filteredStates = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -23,15 +26,6 @@ export function StateSelector() {
     setOpen(false);
     setQuery("");
   };
-
-  useEffect(() => {
-    if (!open) return;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
 
   return (
     <div className="state-selector">
@@ -54,10 +48,10 @@ export function StateSelector() {
             if (event.target === event.currentTarget) setOpen(false);
           }}
         >
-          <div className="state-sheet">
+          <div className="state-sheet" ref={dialogRef}>
             <button
               type="button"
-              onClick={() => setOpen(false)}
+              onClick={close}
               className="state-sheet-close"
               aria-label="Close state selector"
             >

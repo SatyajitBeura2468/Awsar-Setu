@@ -5,7 +5,8 @@ import {
   Banknote,
   Bookmark,
   BriefcaseBusiness,
-  ExternalLink,
+  ChevronDown,
+  ChevronRight,
   GraduationCap,
   HeartHandshake,
   Leaf,
@@ -19,7 +20,6 @@ import { categoryLabels } from "@/lib/i18n";
 import { matchOpportunity } from "@/lib/matching";
 import type { Opportunity, UserProfile, VisualCover } from "@/lib/types";
 import {
-  SourceExitSheet,
   TrustStatus,
 } from "@/components/experience/experience-primitives";
 
@@ -71,7 +71,7 @@ export function OpportunityCard({
       : opportunity.scope.states.join(", ");
 
   return (
-    <article className="opportunity-row">
+    <article className="opportunity-row v5-opportunity-row">
       <div className="opportunity-glyph" aria-hidden="true">
         <Icon className="h-5 w-5" />
       </div>
@@ -103,7 +103,10 @@ export function OpportunityCard({
 
         {profile && (
           <details className="match-details">
-            <summary>{t(match.level)}: why this may fit</summary>
+            <summary>
+              <span>{t(match.level)}: why this may fit</span>
+              <ChevronDown aria-hidden="true" />
+            </summary>
             <ul>
               {match.reasons.slice(0, 3).map((reason) => (
                 <li key={reason}>{reason}</li>
@@ -114,10 +117,10 @@ export function OpportunityCard({
       </div>
 
       <div className="opportunity-row-actions">
-        <SourceExitSheet opportunity={opportunity} className="button-primary small">
-          {opportunity.officialActionLabel}
-          <ExternalLink className="h-4 w-4" aria-hidden="true" />
-        </SourceExitSheet>
+        <Link href={`/opportunities/${opportunity.slug}`} className="row-detail-link">
+          View details
+          <ChevronRight aria-hidden="true" />
+        </Link>
         <button
           type="button"
           onClick={() => void toggleSaved(opportunity.id)}
@@ -129,6 +132,7 @@ export function OpportunityCard({
             fill={saved ? "currentColor" : "none"}
             aria-hidden="true"
           />
+          <span className="sr-only">{saved ? t("savedLabel") : t("save")}</span>
         </button>
       </div>
     </article>

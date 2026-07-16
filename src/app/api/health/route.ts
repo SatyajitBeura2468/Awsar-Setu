@@ -2,6 +2,6 @@ export async function GET() {
   return Response.json({
     ok: true,
     service: "AwsarSetu",
-    version: "1.0.0",
+    version: "2.0.0",
   });
 }

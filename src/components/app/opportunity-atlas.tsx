@@ -1,9 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShieldCheck, UserRound } from "lucide-react";
+import { ArrowRight, Search, ShieldCheck, UserRound } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useProfile } from "@/contexts/profile-context";
+
+const nodes = [
+  [151, 223, "trusted"],
+  [197, 193, "route"],
+  [236, 154, "trusted"],
+  [285, 177, "route"],
+  [324, 139, "trusted"],
+  [347, 217, "route"],
+  [292, 252, "trusted"],
+  [264, 310, "route"],
+  [218, 346, "trusted"],
+  [166, 300, "route"],
+] as const;
 
 export function OpportunityAtlas({
   onSetupProfile,
@@ -18,57 +31,91 @@ export function OpportunityAtlas({
   const isHindi = locale === "hi";
 
   return (
-    <section className="home-hero" aria-labelledby="home-hero-title">
-      <div className="home-hero-copy">
-        <p className="trust-line">
-          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          {isHindi
-            ? "आधिकारिक स्रोतों से चुनी गई भरोसेमंद जानकारी।"
-            : "Curated from official sources. Information you can trust."}
-        </p>
+    <section className="v5-hero" aria-labelledby="home-hero-title">
+      <div className="v5-hero-copy">
         <h1 id="home-hero-title">{t("promise")}</h1>
-        <p className="hero-support">{t("support")}</p>
+        <p className="v5-hero-support">{t("support")}</p>
 
-        <form action={searchAction} className="hero-search">
+        <form action={searchAction} className="v5-search">
           <label className="sr-only" htmlFor="atlas-search">
             {isHindi ? "अवसर खोजें" : "Search opportunities"}
           </label>
-          <Search className="h-5 w-5" aria-hidden="true" />
+          <Search aria-hidden="true" />
           <input
             id="atlas-search"
             name="q"
             placeholder={t("searchPlaceholder")}
           />
-          <button type="submit">{isHindi ? "खोजें" : "Search"}</button>
+          <button type="submit">
+            {isHindi ? "खोजें" : "Search"}
+            <ArrowRight aria-hidden="true" />
+          </button>
         </form>
 
-        <div className="hero-actions">
+        <div className="v5-hero-actions">
           <Link href="/explore" className="button-primary">
             {isHindi ? "अवसर खोजें" : "Explore opportunities"}
+            <ArrowRight aria-hidden="true" />
           </Link>
           <button type="button" className="button-secondary" onClick={onSetupProfile}>
-            <UserRound className="h-4 w-4" aria-hidden="true" />
+            <UserRound aria-hidden="true" />
             {isHindi ? "प्रोफाइल सेट करें" : "Set up profile"}
           </button>
         </div>
+
+        <div className="v5-trust-line">
+          <ShieldCheck aria-hidden="true" />
+          <span>
+            {isHindi
+              ? "आधिकारिक स्रोतों से चुनी गई जानकारी।"
+              : "Source-first information, checked before it reaches you."}
+          </span>
+        </div>
       </div>
 
-      <div className="compass-visual" aria-hidden="true">
-        <svg viewBox="0 0 520 420">
+      <div className="route-map" aria-label={`Opportunity routes focused on ${context}`}>
+        <svg viewBox="0 0 520 430" role="img" aria-hidden="true">
+          <defs>
+            <filter id="node-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
           <path
-            className="india-line"
-            d="M257 37c22 29 58 39 69 73 9 28-22 50-12 81 10 35 55 43 68 76 12 31-25 57-57 67-38 12-52 47-89 51-41 4-45-49-77-64-36-17-84 2-103-29-18-32 24-59 33-93 9-36-26-69-5-99 21-32 71-9 103-31 25-17 38-50 70-32Z"
+            className="map-outline"
+            d="M221 29l25 22 28-3 18 25 39 12 9 31 42 13 15 25 38 8-19 31-34 9-26 28-31 1-8 27-26 17-7 35-22 23-7 45-25 31-14-49-23-26-3-37-31-26 4-35-31-23 13-30-19-34 25-22 8-37 35-3 20-29 23-3 17-31z"
           />
-          <circle className="compass-ring" cx="258" cy="210" r="112" />
-          <circle className="compass-ring subtle" cx="258" cy="210" r="168" />
-          <path className="compass-wave" d="M32 198c72-48 132-57 203-28 71 30 138 23 232-39" />
-          <g className="compass-needle">
-            <path d="M278 188l80-68-56 90-24-22Z" />
-            <path d="M242 232l-80 68 56-90 24 22Z" />
-            <circle cx="260" cy="210" r="15" />
-          </g>
+          <path className="route route-a" d="M92 248C151 229 167 190 236 154S316 179 347 217" />
+          <path className="route route-b" d="M92 248C147 272 194 323 218 346S256 334 264 310" />
+          <path className="route route-c" d="M92 248C151 237 219 245 292 252S363 225 426 184" />
+          <path className="route route-d" d="M92 248C164 220 211 171 285 177S303 148 324 139" />
+          <path className="route route-alt" d="M92 248C152 260 186 291 166 300" />
+          <circle className="origin-ripple ripple-one" cx="92" cy="248" r="31" />
+          <circle className="origin-ripple ripple-two" cx="92" cy="248" r="20" />
+          <circle className="origin" cx="92" cy="248" r="10" />
+          {nodes.map(([cx, cy, tone], index) => (
+            <g key={`${cx}-${cy}`} className={`map-node map-node-${index}`}>
+              <circle cx={cx} cy={cy} r="7" className={tone} />
+              {tone === "trusted" && <path d={`M${cx - 3} ${cy}l2 2 4-5`} />}
+            </g>
+          ))}
+          <path className="direction-arrow" d="M414 188l15-7-7 15-2-7-6-1z" />
         </svg>
-        <p>{isHindi ? `${context} पर केंद्रित` : `${context} focus`}</p>
+        <div className="route-map-label">
+          <span className="route-map-origin" />
+          <div>
+            <strong>{context}</strong>
+            <small>{isHindi ? "आपका शुरुआती बिंदु" : "Your starting point"}</small>
+          </div>
+        </div>
+        <div className="route-legend" aria-hidden="true">
+          <span><i className="legend-route" />Opportunity routes</span>
+          <span><i className="legend-trust" />Verified sources</span>
+          <span><i className="legend-ahead" />Opportunities ahead</span>
+        </div>
       </div>
     </section>
   );

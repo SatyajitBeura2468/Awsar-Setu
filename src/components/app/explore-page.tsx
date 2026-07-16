@@ -3,7 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Filter, RotateCcw, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/language-context";
 import { useProfile } from "@/contexts/profile-context";
 import {
@@ -35,12 +35,12 @@ import { OpportunityCard } from "@/components/opportunities/opportunity-card";
 import { EmptyState } from "./empty-state";
 import { ProfileSheet } from "./profile-sheet";
 
-type Sort = "newest" | "closing" | "best";
+type Sort = "newest" | "closing" | "best" | "checked";
 type DeadlineFilter = "all" | "dated" | "rolling";
 type StatusFilter = Extract<ContentStatus, "verified-active" | "official-directory"> | "all";
 type StateFilter = IndianState | "all" | "profile";
 
-const sortOptions = ["newest", "closing", "best"] as const;
+const sortOptions = ["newest", "closing", "best", "checked"] as const;
 const deadlineOptions = ["all", "dated", "rolling"] as const;
 const statusOptions = ["all", "verified-active", "official-directory"] as const;
 
@@ -56,12 +56,9 @@ const ageBandLabels: Record<AgeBand, string> = {
 
 export function ExplorePage() {
   const params = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const reduceMotion = useReducedMotion();
   const { locale, t } = useLanguage();
   const { profile, profileReady } = useProfile();
-  const currentQueryString = params.toString();
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState(params.get("q") ?? "");
@@ -125,24 +122,20 @@ export function ExplorePage() {
     if (forYou) nextParams.set("lens", "for-you");
 
     const nextQueryString = nextParams.toString();
-    if (nextQueryString !== currentQueryString) {
-      router.replace(
-        `${pathname}${nextQueryString ? `?${nextQueryString}` : ""}`,
-        { scroll: false },
-      );
+    const nextUrl = `/explore${nextQueryString ? `?${nextQueryString}` : ""}`;
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+    if (nextUrl !== currentUrl) {
+      window.history.replaceState(window.history.state, "", nextUrl);
     }
   }, [
     ageBand,
     benefit,
     category,
-    currentQueryString,
     deadline,
     education,
     forYou,
-    pathname,
     query,
     role,
-    router,
     sort,
     state,
     status,
@@ -218,6 +211,9 @@ export function ExplorePage() {
             order[matchOpportunity(activeProfile, a).level] -
             order[matchOpportunity(activeProfile, b).level]
           );
+        }
+        if (sort === "checked") {
+          return b.lastChecked.localeCompare(a.lastChecked);
         }
         return b.updatedAt.localeCompare(a.updatedAt);
       });
@@ -295,22 +291,22 @@ export function ExplorePage() {
   };
 
   return (
-    <div className="explore-page">
-      <section className="explore-hero">
+    <div className="explore-page v5-explore">
+      <section className="explore-hero v5-page-intro">
         <div>
-          <h1>{t("explore")}</h1>
+          <h1>{locale === "hi" ? "अवसर खोजें" : "Explore opportunities"}</h1>
           <p>
             Search trusted pathways and verified notices. Match labels are
             guidance only.
           </p>
         </div>
-        <a href="/explore?category=government-jobs-vacancies" className="text-link">
+        <a href="/explore?category=government-jobs-vacancies" className="v5-arrow-link">
           Browse vacancies
         </a>
       </section>
 
-      <section className="explore-controls" aria-label="Search and filters">
-        <div className="explore-search">
+      <section className="v5-discovery-toolbar" aria-label="Search and sorting">
+        <div className="explore-search v5-discovery-search">
           <Search className="h-5 w-5" aria-hidden="true" />
           <input
             value={query}
@@ -320,22 +316,34 @@ export function ExplorePage() {
         </div>
         <button
           type="button"
-          className="button-secondary"
+          className="button-secondary mobile-filter-trigger"
           onClick={() => setFiltersOpen(true)}
         >
           <Filter className="h-4 w-4" aria-hidden="true" />
           Filters
         </button>
-        <select
-          value={sort}
-          onChange={(event) => setSort(event.target.value as Sort)}
-          aria-label="Sort opportunities"
-          className="control-select"
-        >
-          <option value="newest">Newest</option>
-          <option value="closing">Closing soon</option>
-          <option value="best">Best match</option>
-        </select>
+      </section>
+
+      <div className="v5-sort-row">
+        <span>Sort by</span>
+        <div className="v5-sort-options" aria-label="Sort opportunities">
+          {([
+            ["best", "Best match"],
+            ["newest", "Newest verified"],
+            ["closing", "Closing soon"],
+            ["checked", "Recently checked"],
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setSort(value)}
+              className={sort === value ? "is-active" : ""}
+              aria-pressed={sort === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="segmented-control" aria-label="Personalisation lens">
           <button
             type="button"
@@ -352,7 +360,7 @@ export function ExplorePage() {
             For You
           </button>
         </div>
-      </section>
+      </div>
 
       {activeChips.length > 0 && (
         <div className="active-filter-row" aria-label="Active filters">
@@ -369,35 +377,88 @@ export function ExplorePage() {
         </div>
       )}
 
-      <div className="results-summary">
-        <strong>
-          {results.length} result{results.length === 1 ? "" : "s"}
-        </strong>
-        <span>
-          {forYou
-            ? "Showing likely and possible matches from your profile."
-            : "Showing trusted public pathways."}
-        </span>
-      </div>
+      <div className="v5-discovery-layout">
+        <aside className="v5-filter-rail" aria-label="Filters">
+          <div className="v5-filter-rail-heading">
+            <strong>Filters</strong>
+            <button type="button" onClick={resetFilters}>Reset all</button>
+          </div>
+          <FilterSelect label="Opportunity type" value={category} onChange={setCategory}>
+            <option value="all">All categories</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>{categoryLabels[item][locale]}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect label="Location" value={state} onChange={setState}>
+            <option value="profile">Use current context</option>
+            <option value="all">India-wide and all states</option>
+            {indianStates.map((item) => <option key={item} value={item}>{item}</option>)}
+          </FilterSelect>
+          <FilterSelect label="Who it is for" value={role} onChange={setRole}>
+            <option value="all">Any role</option>
+            {currentRoles.map((item) => (
+              <option key={item} value={item}>{roleLabels[item][locale]}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect label="Education" value={education} onChange={setEducation}>
+            <option value="all">Any education</option>
+            {educationLevels.map((item) => (
+              <option key={item} value={item}>{educationLabels[item][locale]}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect label="Age band" value={ageBand} onChange={setAgeBand}>
+            <option value="all">Any age band</option>
+            {ageBands.filter((item) => item !== "not-specified").map((item) => (
+              <option key={item} value={item}>{ageBandLabels[item]}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect label="Benefit" value={benefit} onChange={setBenefit}>
+            <option value="all">Any benefit</option>
+            {benefitTypes.map((item) => (
+              <option key={item} value={item}>{benefitLabels[item][locale]}</option>
+            ))}
+          </FilterSelect>
+          <FilterSelect label="Trust status" value={status} onChange={setStatus}>
+            <option value="all">Trusted records</option>
+            <option value="verified-active">Verified active</option>
+            <option value="official-directory">Official directory</option>
+          </FilterSelect>
+          <FilterSelect label="Deadline" value={deadline} onChange={setDeadline}>
+            <option value="all">Any deadline</option>
+            <option value="dated">Has verified deadline</option>
+            <option value="rolling">Open or directory</option>
+          </FilterSelect>
+        </aside>
 
-      {results.length ? (
-        <div className="opportunity-list two-column">
-          {results.map((opportunity) => (
-            <OpportunityCard
-              key={opportunity.id}
-              opportunity={opportunity}
-              profile={activeProfile}
+        <section className="v5-results" aria-live="polite">
+          <div className="results-summary">
+            <strong>{results.length} result{results.length === 1 ? "" : "s"}</strong>
+            <span>
+              {forYou
+                ? "Showing likely and possible matches from your profile."
+                : "Showing trusted public pathways."}
+            </span>
+          </div>
+          {results.length ? (
+            <div className="opportunity-list">
+              {results.map((opportunity) => (
+                <OpportunityCard
+                  key={opportunity.id}
+                  opportunity={opportunity}
+                  profile={activeProfile}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              title="No results in this search"
+              description="Try fewer filters, official directories, or a nearby category. AwsarSetu will not fill gaps with unverified records."
+              actionHref="/explore?status=official-directory"
+              actionLabel="Show official directories"
             />
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title="No results in this search"
-          description="Try fewer filters, official directories, or a nearby category. AwsarSetu will not fill gaps with unverified records."
-          actionHref="/explore?status=official-directory"
-          actionLabel="Show official directories"
-        />
-      )}
+          )}
+        </section>
+      </div>
 
       <AnimatePresence>
         {filtersOpen && (
@@ -455,7 +516,7 @@ export function ExplorePage() {
                 </FilterSelect>
                 <FilterSelect label="Age band" value={ageBand} onChange={setAgeBand}>
                   <option value="all">Any age band</option>
-                  {ageBands.map((item) => (
+                  {ageBands.filter((item) => item !== "not-specified").map((item) => (
                     <option key={item} value={item}>
                       {ageBandLabels[item]}
                     </option>
